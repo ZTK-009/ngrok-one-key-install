@@ -172,7 +172,7 @@ function fun_check_run(){
     strRun=""
     ngrok_screen=""
     ngrok_screen_name=""
-    strRun=`netstat -ntl | grep ":4446"`
+    strRun=`netstat -ntl | grep ":${manage_port}"`
     ngrok_screen=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 1`
     ngrok_screen_name=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 2`
 }
@@ -236,7 +236,7 @@ function info_ngrok_clang(){
         echo "Ngrok is not running..."
     else
         fun_load_config
-        curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:4446/info
+        curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:${manage_port}/info
     fi
 }
 
