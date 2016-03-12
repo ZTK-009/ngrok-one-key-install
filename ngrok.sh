@@ -71,7 +71,7 @@ function start_ngrok_clang(){
 		echo -e "Screen window press \033[40;32mCtrl + A + D\033[0m change status Detached."
 	else
 		echo -e "Ngrok is running,screen session id is \033[40;32m${ngrok_screen[0]}\033[0m,sockname \033[40;32m${ngrok_screen_name[0]}\033[0m"
-		echo -e "please input \033[40;32mscreen -r session_id\033[0m or \033[40;32mscreen -r sockname\033[0m restore Ngrok."
+		echo -e "please input \033[40;32mscreen -r \"session_id\"\033[0m or \033[40;32mscreen -r \"sockname\"\033[0m restore Ngrok."
 	fi
 }
 
@@ -172,13 +172,16 @@ function fun_adduser_command(){
 	. /root/.ngrok_adduser.sh
 	rm -f /root/.ngrok_adduser.sh
 	echo ""
+	echo "#############################################################"
 	echo -e "\033[40;32mUser list :\033[0m"
 	curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:4446/info
+	echo "#############################################################"
 	echo -e  "Server:\033[40;32m${dns}\033[0m"
 	echo -e  "Server Port:\033[40;32m${remote_port}\033[0m"
 	echo -e  "userId:\033[40;32m${userName}\033[0m"
 	echo -e  "authId:\033[40;32m${strPassword}\033[0m"
 	echo -e  "Your Subdomain:\033[40;32m${FQDN}\033[0m"
+	echo "#############################################################"
 }
 
 function adduser_ngrok_clang(){
