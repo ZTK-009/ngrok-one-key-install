@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 #=======================================================
-#   System Required:  CentOS、Debian or Ubuntu (32bit/64bit)
+#   System Required:  CentOS/Debian/Ubuntu (32bit/64bit)
 #   Description:  Manager for Ngrok, Written by Clang
 #   Author: Clang <admin@clangcn.com>
 #   Intro:  http://clangcn.com
