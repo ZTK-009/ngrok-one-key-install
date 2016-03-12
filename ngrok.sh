@@ -47,6 +47,7 @@ stty $SAVEDSTTY
 }
 
 function fun_load_config(){
+    manage_port="4446"
     . /root/.ngrok_config.sh
 }
 
@@ -67,6 +68,7 @@ function stop_ngrok_clang(){
 function start_ngrok_clang(){
     fun_check_run
     if [ "$strRun" = "" ]; then
+        fun_check_port
         echo "Start Ngrok..."
         fun_load_config
         cd /usr/local/ngrok
@@ -126,17 +128,17 @@ ngrok_subdomain ) (
         fun_set_ngrok_subdomain
     else
         ddns=(${subdomain})
-        [ ! -z "${ddns[0]}" ] && subdns=\"${ddns[0]}\"
-        [ ! -z "${ddns[1]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\"
-        [ ! -z "${ddns[2]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\"
-        [ ! -z "${ddns[3]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\"
-        [ ! -z "${ddns[4]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\",\"${ddns[4]}\"
+        [ -n "${ddns[0]}" ] && subdns=\"${ddns[0]}\"
+        [ -n "${ddns[1]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\"
+        [ -n "${ddns[2]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\"
+        [ -n "${ddns[3]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\"
+        [ -n "${ddns[4]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\",\"${ddns[4]}\"
         fun_load_config
-        [ ! -z "${ddns[0]}" ] && FQDN=\"${ddns[0]}.${dns}\"
-        [ ! -z "${ddns[1]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\"
-        [ ! -z "${ddns[2]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\"
-        [ ! -z "${ddns[3]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\"
-        [ ! -z "${ddns[4]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\",\"${ddns[4]}.${dns}\"
+        [ -n "${ddns[0]}" ] && FQDN=\"${ddns[0]}.${dns}\"
+        [ -n "${ddns[1]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\"
+        [ -n "${ddns[2]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\"
+        [ -n "${ddns[3]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\"
+        [ -n "${ddns[4]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\",\"${ddns[4]}.${dns}\"
         echo -e "Your subdomain: \033[40;32m"${subdns}" \033[0m."
         fun_set_ngrok_username
     fi
@@ -166,22 +168,48 @@ esac
 }
 
 function fun_check_run(){
+    # check run
     strRun=""
     ngrok_screen=""
-    strRun=`netstat -ntl | grep ':4446'`
+    ngrok_screen_name=""
+    strRun=`netstat -ntl | grep ":4446"`
     ngrok_screen=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 1`
     ngrok_screen_name=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 2`
 }
 
+function fun_check_port(){
+    fun_load_config
+    strHttpPort=""
+    strHttpsPort=""
+    strRemotePort=""
+    strManPort=""
+    strHttpPort=`netstat -ntl | grep ":${http_port}"`
+    strHttpsPort=`netstat -ntl | grep ":${https_port}"`
+    strRemotePort=`netstat -ntl | grep ":${remote_port}"`
+    strManagePort=`netstat -ntl | grep ":${manage_port}"`
+    if [ -n "${strHttpPort}" ] || [ -n "${strHttpsPort}" ] || [ -n "${strRemotePort}" ] || [ -n "${strManagePort}" ]; then
+        [ -n "${strHttpPort}" ] && str_http_port="${http_port}"
+        [ -n "${strHttpsPort}" ] && str_https_port="${https_port}"
+        [ -n "${strRemotePort}" ] && str_remote_port="${remote_port}"
+        [ -n "${strManagePort}" ] && str_manage_port="${manage_port}"
+        echo "Error: Port ${str_http_port} ${str_https_port} ${str_remote_port} ${str_manage_port} is used,view relevant port:"
+        [ -n "${strHttpPort}" ] && netstat -apn | grep ":${http_port}"
+        [ -n "${strHttpsPort}" ] && netstat -apn | grep ":${https_port}"
+        [ -n "${strRemotePort}" ] && netstat -apn | grep ":${remote_port}"
+        [ -n "${strManagePort}" ] && netstat -apn | grep ":${manage_port}"
+        exit 1
+    fi
+}
+
 function fun_adduser_command(){
-    echo  curl -H \"Content-Type: application/json\" -H \"Auth:${pass}\" -X POST -d \''{'\"userId\":\"${strPassword}\",\"authId\":\"${userName}\",\"dns\":[${subdns}]'}'\' http://localhost:4446/adduser >/root/.ngrok_adduser.sh
+    echo  curl -H \"Content-Type: application/json\" -H \"Auth:${pass}\" -X POST -d \''{'\"userId\":\"${strPassword}\",\"authId\":\"${userName}\",\"dns\":[${subdns}]'}'\' http://localhost:${manage_port}/adduser >/root/.ngrok_adduser.sh
     chmod +x /root/.ngrok_adduser.sh
     . /root/.ngrok_adduser.sh
     rm -f /root/.ngrok_adduser.sh
     clear
     clang.cn
     echo -e "\033[40;32mUser list :\033[0m"
-    curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:4446/info
+    curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:${manage_port}/info
     echo "#############################################################"
     echo -e  "Server:\033[40;32m${dns}\033[0m"
     echo -e  "Server Port:\033[40;32m${remote_port}\033[0m"

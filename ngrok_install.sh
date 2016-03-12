@@ -47,6 +47,27 @@ function checkos(){
     fi
 }
 
+# Get version
+function getversion(){
+    if [[ -s /etc/redhat-release ]];then
+        grep -oE  "[0-9.]+" /etc/redhat-release
+    else    
+        grep -oE  "[0-9.]+" /etc/issue
+    fi    
+}
+
+# CentOS version
+function centosversion(){
+    local code=$1
+    local version="`getversion`"
+    local main_ver=${version%%.*}
+    if [ $main_ver == $code ];then
+        return 0
+    else
+        return 1
+    fi        
+}
+
 # Check OS bit
 function check_os_bit(){
     if [[ `getconf WORD_BIT` = '32' && `getconf LONG_BIT` = '64' ]] ; then
@@ -54,6 +75,13 @@ function check_os_bit(){
     else
         Is_64bit='n'
     fi
+}
+
+function check_centosversion(){
+if centosversion 5; then
+    echo "Not support CentOS 5.x, please change to CentOS 6,7 or Debian or Ubuntu and try again."
+    exit 1
+fi
 }
 
 # Disable selinux
@@ -118,11 +146,9 @@ chmod 500 /root/ngrok.sh /root/.ngrok_config.sh
 }
 
 function fun_install_ngrok(){
-    clear
-    fun_clangcn.com
     checkos
+    check_centosversion
     check_os_bit
-    rootness
     disable_selinux
     fun_set_ngrok_domain
 }
@@ -131,7 +157,7 @@ function pre_install(){
     echo "install ngrok,please wait..."
     if [ "${OS}" == 'CentOS' ]; then
         #yum -y update
-        yum -y install unzip nano screen git zlib-devel openssl-devel perl hg cpio expat-devel gettext-devel curl curl-devel perl-ExtUtils-MakeMaker wget gcc gcc-c++
+        yum -y install unzip nano screen git net-tools zlib-devel openssl-devel perl hg cpio expat-devel gettext-devel curl curl-devel perl-ExtUtils-MakeMaker wget gcc gcc-c++
     else
         apt-get update -y
         apt-get install -y wget build-essential mercurial git nano screen curl openssl libcurl4-openssl-dev
@@ -195,12 +221,12 @@ function pre_install(){
         echo ""
         echo "For more information please visit http://clang.cn/"
         echo ""
-        echo "ngrok status manage: /root/ngrok.sh {start|stop|restart|config|adduser|info}"
+        echo -e "ngrok status manage: \033[45;37m/root/ngrok.sh\033[0m {\033[40;31mstart\033[0m|\033[40;32mstop\033[0m|\033[40;33mrestart\033[0m|\033[40;34mconfig\033[0m|\033[40;35madduser\033[0m|\033[40;36minfo\033[0m}"
         echo -e "Your Domain: \033[32m\033[01m${NGROK_DOMAIN}\033[0m"
         echo -e "Ngrok password: \033[32m\033[01m${ngrok_pass}\033[0m"
-        echo -e "http_port:\033[32m\033[01m80\033[0m"
-        echo -e "https_port:\033[32m\033[01m443\033[0m"
-        echo -e "remote_port:\033[32m\033[01m4443\033[0m"
+        echo -e "http_port: \033[32m\033[01m80\033[0m"
+        echo -e "https_port: \033[32m\033[01m443\033[0m"
+        echo -e "remote_port: \033[32m\033[01m4443\033[0m"
         echo -e "Config file:   \033[32m\033[01m/root/.ngrok_config.sh\033[0m"
         echo ""
         echo "========================================================================="
@@ -219,6 +245,9 @@ function pre_install(){
     min_remainder=$(expr ${hour_remainder} % 60) ;
     echo -e "Shell run time is \033[32m \033[01m${hour_distance} hour ${min_distance} min ${min_remainder} sec\033[0m"
 }
+clear
+fun_clangcn.com
+rootness
 rm -f /root/ngrok_install.log
 fun_install_ngrok 2>&1 | tee /root/ngrok_install.log
 exit 0
