@@ -155,7 +155,7 @@ ngrok_authId ) (
     else
         echo -e "Your authId: \033[40;32m"${strPassword}" \033[0m."
         fun_adduser_command
-    fi  
+    fi
 );;
 *) break;;
 esac
@@ -176,8 +176,6 @@ function fun_adduser_command(){
     rm -f /root/.ngrok_adduser.sh
     clear
     clang.cn
-    echo ""
-    echo "#############################################################"
     echo -e "\033[40;32mUser list :\033[0m"
     curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:4446/info
     echo "#############################################################"
