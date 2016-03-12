@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 #=======================================================
-#   System Required:  Debian or Ubuntu (32bit/64bit)
+#   System Required:  CentOS、Debian or Ubuntu (32bit/64bit)
 #   Description:  Manager for Ngrok, Written by Clang
 #   Author: Clang <admin@clangcn.com>
 #   Intro:  http://clangcn.com
@@ -11,15 +11,15 @@ export PATH
 clear
 function clang.cn(){
     echo "#############################################################"
-    echo "#  Manager Ngrok for Debian or Ubuntu (32bit/64bit)"
+    echo "#  Manager Ngrok for CentOS/Debian/Ubuntu (32bit/64bit)"
     echo "#  Intro: http://clangcn.com"
     echo "#"
     echo "#  Author: Clang <admin@clangcn.com>"
     echo "#"
     echo "#############################################################"
-    echo ""
 }
 clang.cn
+echo ""
 # Check if user is root
 if [ $(id -u) != "0" ]; then
     echo "Error: You must be root to run this script, please use root to install lnmp"
@@ -29,7 +29,11 @@ if [ ! -s /root/.ngrok_config.sh ]; then
     echo -e "Error: Ngrok config file \033[40;32m/root/.ngrok_config.sh\033[0m not found!!!"
     exit 1
 fi
-
+if [ ! -s /usr/local/ngrok/bin/ngrokd ]; then
+    echo -e "Error: Ngrokd not found!!!Ngrok not install!!"
+    echo -e "Please run \033[32m\033[01mwget http://soft.clang.cn/ngrok/ngrok_install.sh && bash ./ngrok_install.sh\033[0m install ngrok."
+    exit 1
+fi
 
 get_char()
 {
@@ -155,7 +159,7 @@ ngrok_authId ) (
     else
         echo -e "Your authId: \033[40;32m"${strPassword}" \033[0m."
         fun_adduser_command
-    fi
+    fi  
 );;
 *) break;;
 esac
