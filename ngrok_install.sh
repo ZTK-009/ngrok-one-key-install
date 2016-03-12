@@ -28,7 +28,7 @@ echo "# One click Install Ngrok"
 echo "# Intro: http://clang.cn/blog/"
 echo "#"
 echo "# Author: Clang <admin@clangcn.com>"
-echo "# version:1.0"
+echo "# version:2.0"
 echo "#############################################################"
 echo ""
 }
@@ -119,33 +119,33 @@ function pre_install(){
 	echo "install ngrok,please wait..."
 	apt-get update -y
 	apt-get install -y build-essential mercurial git nano screen curl openssl libcurl4-openssl-dev
-	cd /root
+	cd /usr/local/
+	# rm -fr /usr/local/go/
 	# Download shadowsocks chkconfig file
 	if [ `getconf WORD_BIT` = '32' ] && [ `getconf LONG_BIT` = '64' ] ; then
-        if [ ! -s /root/go1.6.linux-amd64.tar.gz ]; then
-		    if ! wget http://www.golangtc.com/static/go/1.6/go1.6.linux-amd64.tar.gz; then
-		        echo "Failed to download go1.6.linux-386.tar.gz file!"
+        if [ ! -s /usr/local/go/bin/go ]; then
+        	git clone https://github.com/clangcn/go1.6.linux-amd64.git go
+		    if [ ! -s /usr/local/go/bin/go ]; then
+		        echo "Failed to download go1.6.linux-386 file!"
 		        exit 1
 		    fi
 		fi
-		tar zxvf go1.6.linux-amd64.tar.gz
 	else
-        if [ ! -s /root/go1.6.linux-386.tar.gz ]; then
-		    if ! wget http://www.golangtc.com/static/go/1.6/go1.6.linux-386.tar.gz; then
-		        echo "Failed to download go1.6.linux-386.tar.gz file!"
+        if [ ! -s /usr/local/go/bin/go ]; then
+        	git clone https://github.com/clangcn/go1.6.linux-386.git go
+		    if [ ! -s /usr/local/go/bin/go ]; then
+		        echo "Failed to download go1.6.linux-386 file!"
 		        exit 1
 		    fi
 		fi
-		tar zxvf go1.6.linux-386.tar.gz
 	fi
-	mv go/ /usr/local/
+	rm -fr /usr/local/go/.git/
 	rm -f /usr/bin/go /usr/bin/godoc /usr/bin/gofmt
 	ln -s /usr/local/go/bin/* /usr/bin/
 	cd /usr/local/
-	git clone https://github.com/koolshare/ngrok-1.7.git ngrok
+	git clone https://github.com/clangcn/ngrok-1.7.git ngrok
 	export GOPATH=/usr/local/ngrok/
 	cd ngrok
-	sed -i 's;code.google.com\/p\/log4go;github.com\/keepeye\/log4go;g' src/ngrok/log/logger.go
 	openssl genrsa -out rootCA.key 2048
 	openssl req -x509 -new -nodes -key rootCA.key -subj "/CN=$NGROK_DOMAIN" -days 5000 -out rootCA.pem
 	openssl genrsa -out server.key 2048
@@ -155,13 +155,6 @@ function pre_install(){
 	cp rootCA.pem assets/client/tls/ngrokroot.crt
 	cp server.crt assets/server/tls/snakeoil.crt
 	cp server.key assets/server/tls/snakeoil.key
-	cd /usr/local/ngrok/src/github.com/gorilla
-	git clone https://github.com/gorilla/mux.git
-	git clone https://github.com/gorilla/context.git
-	cd /usr/local/ngrok/src/github.com/peterbourgon
-	git clone https://github.com/peterbourgon/diskv.git
-	cd /usr/local/ngrok/src/github.com/petar
-	git clone https://github.com/petar/GoLLRB.git
 	if [ `getconf WORD_BIT` = '32' ] && [ `getconf LONG_BIT` = '64' ] ; then
         cd /usr/local/go/src
 		GOOS=linux GOARCH=amd64 ./make.bash
@@ -186,7 +179,7 @@ function pre_install(){
 	    echo "Enjoy it!"
 	else
         echo ""
-        echo "Shadowsocks install failed! please view $HOME/ngrok_install.log."
+        echo "Shadowsocks install failed! please view $HOME/ngrok_install.log"
         exit 1
     fi
 
@@ -201,3 +194,4 @@ function pre_install(){
 rm -f $HOME/ngrok_install.log
 fun_install_ngrok 2>&1 | tee $HOME/ngrok_install.log
 exit 0
+
