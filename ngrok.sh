@@ -10,6 +10,7 @@ export PATH
 
 clear
 function clang.cn(){
+    echo ""
     echo "#############################################################"
     echo "#  Manager Ngrok for CentOS/Debian/Ubuntu (32bit/64bit)"
     echo "#  Intro: http://clangcn.com"
@@ -53,35 +54,31 @@ function fun_load_config(){
 
 function stop_ngrok_clang(){
     fun_check_run
-    if [ "$strRun" = "" ]; then
+    if [ "${str_Ngrok_PID}" = "" ]; then
         echo "Ngrok is not running..."
     else
-        echo "Stop Ngrok..."
-        ngrok_screen_id=""
-        for ngrok_screen_id in ${ngrok_screen[@]}; do
-            screen -S "${ngrok_screen_id}" -X quit
-        done
-        echo "ngrok stop success!"
+        echo "Stop Ngrok(PID:${str_Ngrok_PID})..."
+        killall ngrokd
+        echo "Ngrok stop success!"
     fi
 }
 
 function start_ngrok_clang(){
     fun_check_run
-    if [ "$strRun" = "" ]; then
+    if [ "${str_Ngrok_PID}" = "" ]; then
         fun_check_port
         echo "Start Ngrok..."
         fun_load_config
         cd /usr/local/ngrok
         echo $PWD
-        echo ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=":$remote_port"
-        screen -dmS ngrok_clang ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=":$remote_port"
-        echo -e "Ngrok is running,creen session id is \033[40;32m${ngrok_screen[0]}\033[0m,sockname \033[40;32m${ngrok_screen_name[0]}\033[0m"
-        echo -e "Please input \033[40;32mscreen -ls\033[0m view screen list."
-        echo -e "Please input \033[40;32mscreen -r ngrok_clang\033[0m restore Ngrok screen."    
-        echo -e "Screen window press \033[40;32mCtrl + A + D\033[0m change status Detached."
+        echo ./bin/ngrokd -domain=\"$dns\" -httpAddr=\":$http_port\" -httpsAddr=\":$https_port\" -pass=\"$pass\" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=\":$remote_port\"
+        nohup ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port" > ${ngrok_log} 2>&1 &
+        fun_check_run
+        echo -e "Ngrok is running..."
+        echo "read ${ngrok_log} for log"
     else
-        echo -e "Ngrok is running,screen session id is \033[40;32m${ngrok_screen[0]}\033[0m,sockname \033[40;32m${ngrok_screen_name[0]}\033[0m"
-        echo -e "please input \033[40;32mscreen -r \"session_id\"\033[0m or \033[40;32mscreen -r \"sockname\"\033[0m restore Ngrok."
+        echo -e "Ngrok is running, ngrokd ProcessID is\033[40;32m" ${str_Ngrok_PID}"\033[0m."
+        echo "read ${ngrok_log} for log"
     fi
 }
 
@@ -170,12 +167,13 @@ esac
 
 function fun_check_run(){
     # check run
-    strRun=""
-    ngrok_screen=""
-    ngrok_screen_name=""
-    strRun=`netstat -ntl | grep ":${manage_port}"`
-    ngrok_screen=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 1`
-    ngrok_screen_name=`screen -ls | grep 'ngrok_clang' | awk '{print $1}' | cut -d '.' -f 2`
+    ngrok_log="ngrok.log"
+    str_Ngrok_proc=""
+    array_Ngrok_PID=""
+    str_Ngrok_PID=""
+    str_Ngrok_proc=`netstat -apn | grep "ngrokd" | awk '{print $7}'| cut -d '/' -f 1`
+    array_Ngrok_PID=(${str_Ngrok_proc})
+    str_Ngrok_PID="${array_Ngrok_PID[0]}"
 }
 
 function fun_check_port(){
@@ -223,7 +221,7 @@ function fun_adduser_command(){
 function adduser_ngrok_clang(){
     fun_check_run
     fun_load_config
-    if [ "$strRun" = "" ]; then
+    if [ "${str_Ngrok_PID}" = "" ]; then
         echo "Ngrok is not running..."
     else
         fun_load_config
@@ -233,7 +231,7 @@ function adduser_ngrok_clang(){
 
 function info_ngrok_clang(){
     fun_check_run
-    if [ "$strRun" = "" ]; then
+    if [ "${str_Ngrok_PID}" = "" ]; then
         echo "Ngrok is not running..."
     else
         fun_load_config
