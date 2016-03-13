@@ -73,7 +73,6 @@ function start_ngrok_clang(){
         echo $PWD
         echo ./bin/ngrokd -domain=\"$dns\" -httpAddr=\":$http_port\" -httpsAddr=\":$https_port\" -pass=\"$pass\" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=\":$remote_port\"
         nohup ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port" > ${ngrok_log} 2>&1 &
-        fun_check_run
         echo -e "Ngrok is running..."
         echo "read ${ngrok_log} for log"
     else
