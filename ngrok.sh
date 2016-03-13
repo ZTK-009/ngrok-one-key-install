@@ -75,6 +75,7 @@ function start_ngrok_clang(){
         echo $PWD
         echo ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=":$remote_port"
         screen -dmS ngrok_clang ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=":$remote_port"
+        echo -e "Ngrok is running,creen session id is \033[40;32m${ngrok_screen[0]}\033[0m,sockname \033[40;32m${ngrok_screen_name[0]}\033[0m"
         echo -e "Please input \033[40;32mscreen -ls\033[0m view screen list."
         echo -e "Please input \033[40;32mscreen -r ngrok_clang\033[0m restore Ngrok screen."    
         echo -e "Screen window press \033[40;32mCtrl + A + D\033[0m change status Detached."
