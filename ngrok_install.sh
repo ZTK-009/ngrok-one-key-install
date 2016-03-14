@@ -141,7 +141,7 @@ srtCRT=server.crt
 strKey=server.key
 # -------------config END-------------
 EOF
-wget http://soft.clang.cn/ngrok/ngrok.sh -O /root/ngrok.sh
+wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok.sh -O /root/ngrok.sh
 chmod 500 /root/ngrok.sh /root/.ngrok_config.sh
 }
 
@@ -166,23 +166,23 @@ function pre_install(){
     # rm -fr /usr/local/go/
     # Download shadowsocks chkconfig file
     if [ "${Is_64bit}" == 'y' ] ; then
-        if [ ! -s /usr/local/go/bin/go ]; then
-            git clone https://github.com/clangcn/go1.6.linux-amd64.git go
-            if [ ! -s /usr/local/go/bin/go ]; then
-                echo "Failed to download go1.6.linux-386 file!"
+        if [ ! -s /root/go1.6.linux-amd64.tar.gz ]; then
+            if ! wget --no-check-certificate https://github.com/clangcn/golang/raw/master/go1.6/go1.6.linux-amd64.tar.gz; then
+                echo "Failed to download go1.6.linux-amd64.tar.gz file!"
                 exit 1
             fi
         fi
+        tar zxvf go1.6.linux-amd64.tar.gz
     else
-        if [ ! -s /usr/local/go/bin/go ]; then
-            git clone https://github.com/clangcn/go1.6.linux-386.git go
-            if [ ! -s /usr/local/go/bin/go ]; then
-                echo "Failed to download go1.6.linux-386 file!"
+         if [ ! -s /root/go1.6.linux-386.tar.gz ]; then
+            if ! wget --no-check-certificate https://github.com/clangcn/golang/raw/master/go1.6/go1.6.linux-386.tar.gz; then
+                echo "Failed to download go1.6.linux-386.tar.gz file!"
                 exit 1
             fi
         fi
+        tar zxvf go1.6.linux-386.tar.gz
     fi
-    rm -fr /usr/local/go/.git/
+    mv go/ /usr/local/
     rm -f /usr/bin/go /usr/bin/godoc /usr/bin/gofmt
     ln -s /usr/local/go/bin/* /usr/bin/
     go version

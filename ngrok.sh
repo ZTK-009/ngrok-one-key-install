@@ -32,7 +32,7 @@ if [ ! -s /root/.ngrok_config.sh ]; then
 fi
 if [ ! -s /usr/local/ngrok/bin/ngrokd ]; then
     echo -e "Error: Ngrokd not found!!!Ngrok not install!!"
-    echo -e "Please run \033[32m\033[01mwget http://soft.clang.cn/ngrok/ngrok_install.sh && bash ./ngrok_install.sh\033[0m install ngrok."
+    echo -e "Please run \033[32m\033[01mwget https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh && bash ./ngrok_install.sh\033[0m install ngrok."
     exit 1
 fi
 
