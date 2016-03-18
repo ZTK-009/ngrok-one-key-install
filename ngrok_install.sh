@@ -162,8 +162,7 @@ function pre_install(){
         apt-get update -y
         apt-get install -y wget build-essential mercurial git nano screen curl openssl libcurl4-openssl-dev
     fi
-    cd /usr/local/
-    # rm -fr /usr/local/go/
+    cd /root/
     # Download shadowsocks chkconfig file
     if [ "${Is_64bit}" == 'y' ] ; then
         if [ ! -s /root/go1.6.linux-amd64.tar.gz ]; then
