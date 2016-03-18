@@ -2,6 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
+version="V4.0"
 # Check if user is root
 function rootness(){
     if [[ $EUID -ne 0 ]]; then
@@ -24,11 +25,11 @@ get_char()
 function fun_clangcn.com(){
 echo ""
 echo "#######################################################################"
-echo "# On key install Ngrok V3.0 for Debian/Ubuntu/CentOS Linux Server"
+echo "# On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
 echo "# Intro: http://clang.cn/blog/"
 echo "#"
 echo "# Author: Clang <admin@clangcn.com>"
-echo "# version:3.0"
+echo "# version:${version}"
 echo "#######################################################################"
 echo ""
 }
@@ -215,7 +216,7 @@ function pre_install(){
         fun_clangcn.com
         echo "Install Ngrok completed! enjoy it."
         echo "========================================================================="
-        echo "On key install Ngrok V3.0 for Debian/Ubuntu/CentOS Linux Server"
+        echo "On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
         echo "========================================================================="
         echo ""
         echo "For more information please visit http://clang.cn/"

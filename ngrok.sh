@@ -7,12 +7,15 @@ export PATH
 #   Author: Clang <admin@clangcn.com>
 #   Intro:  http://clangcn.com
 #=======================================================
+version="v4.0"
+arg1=$1
+arg2=$2
 
 clear
 function clang.cn(){
     echo ""
     echo "#############################################################"
-    echo "#  Manager Ngrok for CentOS/Debian/Ubuntu (32bit/64bit)"
+    echo "#  Manager Ngrok ${version} for CentOS/Debian/Ubuntu (32bit/64bit)"
     echo "#  Intro: http://clangcn.com"
     echo "#"
     echo "#  Author: Clang <admin@clangcn.com>"
@@ -228,6 +231,61 @@ function adduser_ngrok_clang(){
     fi
 }
 
+function userlist_ngrok_clang(){
+    echo -e "\033[32mNgrok user list:\033[0m"
+    ls /tmp/db-diskv/ng/ro/ |cut -d ':' -f 2
+}
+
+function deluser_ngrok_clang(){
+    if [ -z "${1}" ]; then
+        strWantdeluser=""
+        userlist_ngrok_clang
+        echo ""
+        read -p "Please input del username you want:" strWantdeluser
+        if [ "${strWantdeluser}" = "" ]; then
+            echo "Error: You must input username!!"
+            exit 1
+        else
+            deluser_clang "${strWantdeluser}"
+        fi
+    else
+        deluser_clang "${1}"
+    fi
+}
+
+function deluser_clang(){
+    if [ -z "${1}" ]; then
+        echo "Error: You must input username!!"
+        exit 1
+    else
+        strDelUser="${1}"
+        echo -e "You want del \033[32m${strDelUser}\033[0m!"
+        read -p "(if you want please input: y,Default [no]):" strConfirmDel
+        case "$strConfirmDel" in
+        y|Y|Yes|YES|yes|yES|yEs|YeS|yeS)
+        echo ""
+        strConfirmDel="y"
+        ;;
+        n|N|No|NO|no|nO)
+        echo ""
+        strConfirmDel="n"
+        ;;
+        *)
+        echo ""
+        strConfirmDel="n"
+        esac
+        if [ $strConfirmDel = "y" ]; then
+            if [ -s "/tmp/db-diskv/ng/ro/ngrok:${strDelUser}" ]; then
+                rm -f /tmp/db-diskv/ng/ro/ngrok:${strDelUser}
+                echo -e "Delete user \033[32m${strDelUser}\033[0m ok!"
+            else
+                echo ""
+                echo -e "Error: user \033[32m${strDelUser}\033[0m not found!"
+            fi
+        fi
+    fi
+}
+
 function info_ngrok_clang(){
     fun_check_run
     if [ "${str_Ngrok_PID}" = "" ]; then
@@ -239,9 +297,8 @@ function info_ngrok_clang(){
 }
 
 # Initialization
-action=$1
-[  -z $1 ]
-case "$action" in
+[  -z ${arg1} ]
+case "${arg1}" in
 start)
     start_ngrok_clang
     ;;
@@ -257,11 +314,18 @@ config)
 adduser)
     adduser_ngrok_clang
     ;;
+deluser)
+    deluser_ngrok_clang ${arg2}
+    ;;
+userlist)
+    userlist_ngrok_clang
+    ;;
 info)
     info_ngrok_clang
     ;;
 *)
     echo "Arguments error! [${action} ]"
-    echo "Usage: `basename $0` {start|stop|restart|config|adduser|info}"
+    echo "Usage: `basename $0` {start|stop|restart|config|adduser|deluser|userlist|info}"
+    echo "Usage: `basename $0` deluser {username}"
     ;;
 esac
