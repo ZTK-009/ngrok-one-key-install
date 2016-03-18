@@ -246,14 +246,14 @@ function deluser_ngrok_clang(){
             echo "Error: You must input username!!"
             exit 1
         else
-            deluser_clang "${strWantdeluser}"
+            deluser_Confirm_clang "${strWantdeluser}"
         fi
     else
-        deluser_clang "${1}"
+        deluser_Confirm_clang "${1}"
     fi
 }
 
-function deluser_clang(){
+function deluser_Confirm_clang(){
     if [ -z "${1}" ]; then
         echo "Error: You must input username!!"
         exit 1
