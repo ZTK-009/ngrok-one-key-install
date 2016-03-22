@@ -184,20 +184,20 @@ function fun_check_port(){
     strHttpsPort=""
     strRemotePort=""
     strManPort=""
-    strHttpPort=`netstat -ntl | grep ":${http_port}"`
-    strHttpsPort=`netstat -ntl | grep ":${https_port}"`
-    strRemotePort=`netstat -ntl | grep ":${remote_port}"`
-    strManagePort=`netstat -ntl | grep ":${manage_port}"`
+    strHttpPort=`netstat -ntl | grep "\b:${http_port}\b"`
+    strHttpsPort=`netstat -ntl | grep "\b:${https_port}\b"`
+    strRemotePort=`netstat -ntl | grep "\b:${remote_port}\b"`
+    strManagePort=`netstat -ntl | grep "\b:${manage_port}\b"`
     if [ -n "${strHttpPort}" ] || [ -n "${strHttpsPort}" ] || [ -n "${strRemotePort}" ] || [ -n "${strManagePort}" ]; then
         [ -n "${strHttpPort}" ] && str_http_port="${http_port}"
         [ -n "${strHttpsPort}" ] && str_https_port="${https_port}"
         [ -n "${strRemotePort}" ] && str_remote_port="${remote_port}"
         [ -n "${strManagePort}" ] && str_manage_port="${manage_port}"
-        echo "Error: Port ${str_http_port} ${str_https_port} ${str_remote_port} ${str_manage_port} is used,view relevant port:"
-        [ -n "${strHttpPort}" ] && netstat -apn | grep ":${http_port}"
-        [ -n "${strHttpsPort}" ] && netstat -apn | grep ":${https_port}"
-        [ -n "${strRemotePort}" ] && netstat -apn | grep ":${remote_port}"
-        [ -n "${strManagePort}" ] && netstat -apn | grep ":${manage_port}"
+        echo -e "Error: Port \033[32m${str_http_port} ${str_https_port} ${str_remote_port} ${str_manage_port}\033[0m is \033[31m\033[01mused\033[0m,view relevant port:"
+        [ -n "${strHttpPort}" ] && netstat -apn | grep "\b:${http_port}\b"
+        [ -n "${strHttpsPort}" ] && netstat -apn | grep "\b:${https_port}\b"
+        [ -n "${strRemotePort}" ] && netstat -apn | grep "\b:${remote_port}\b"
+        [ -n "${strManagePort}" ] && netstat -apn | grep "\b:${manage_port}\b"
         exit 1
     fi
 }
@@ -277,7 +277,8 @@ function deluser_Confirm_clang(){
         if [ $strConfirmDel = "y" ]; then
             if [ -s "/tmp/db-diskv/ng/ro/ngrok:${strDelUser}" ]; then
                 rm -f /tmp/db-diskv/ng/ro/ngrok:${strDelUser}
-                echo -e "Delete user \033[32m${strDelUser}\033[0m ok!"
+                echo -e "Delete user \033[32m${strDelUser}\033[0m ok! Restart Ngrok..."
+                restart_ngrok_clang
             else
                 echo ""
                 echo -e "Error: user \033[32m${strDelUser}\033[0m not found!"
