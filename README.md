@@ -1,36 +1,37 @@
-# ngrok - Introspected tunnels to localhost ([homepage](https://ngrok.com))
-### "I want to securely expose a web server to the internet and capture all traffic for detailed inspection and replay"
-![](https://ngrok.com/static/img/overview.png)
+#Ngrok服务器一键安装脚本【支持用户管理】（穿透DDNS）
 
-## What is ngrok?
-ngrok is a reverse proxy that creates a secure tunnel between from a public endpoint to a locally running web service.
-ngrok captures and analyzes all traffic over the tunnel for later inspection and replay.
+##在此非常感谢[koolshare](http://koolshare.cn/forum-72-1.html)的[小宝](http://koolshare.cn/space-uid-2380.html)宝大对ngrok进行的二次开发，让我等可以用上非常好用的程序，同时感谢[woaihsw](http://koolshare.cn/space-uid-13735.html)在脚本制作中提供的帮助。
 
-## What can I do with ngrok?
-- Expose any http service behind a NAT or firewall to the internet on a subdomain of ngrok.com
-- Expose any tcp service behind a NAT or firewall to the internet on a random port of ngrok.com
-- Inspect all http requests/responses that are transmitted over the tunnel
-- Replay any request that was transmitted over the tunnel
+脚本是业余爱好，英文属于文盲，写的不好，不要笑话我，欢迎您批评指正。
+安装平台：CentOS、Debian、Ubuntu。
+Server
+------
 
+### Install
 
-## What is ngrok useful for?
-- Temporarily sharing a website that is only running on your development machine
-- Demoing an app at a hackathon without deploying
-- Developing any services which consume webhooks (HTTP callbacks) by allowing you to replay those requests
-- Debugging and understanding any web service by inspecting the HTTP traffic
-- Running networked services on machines that are firewalled off from the internet
+Debian / Ubuntu:
 
+    apt-get -y install screen
+    screen -S ngrok_install
+    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ngrok_install.sh
+    chmod 500 ./ngrok_install.sh
+    ./ngrok_install.sh
 
-## Downloading and installing ngrok
-ngrok has _no_ runtime dependencies. Just download a single binary for your platform and run it. Some premium features
-are only available by creating an account on ngrok.com. If you need them, [create an account on ngrok.com](https://ngrok.com/signup).
+CentOS:
 
-- [Linux](https://dl.ngrok.com/linux_386/ngrok.zip)
-- [Mac OSX](https://dl.ngrok.com/darwin_386/ngrok.zip)
-- [Windows](https://dl.ngrok.com/windows_386/ngrok.zip)
+    yum -y install screen
+    screen -S ngrok_install
+    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ngrok_install.sh
+    chmod 500 ./ngrok_install.sh
+    ./ngrok_install.sh
 
-## Install
-- One click Install ngrok
+### 服务器管理
 
-wget http://soft.clang.cn/ngrok/ngrok_install.sh && bash ./ngrok_install.sh
+	Usage: ngrok.sh {start|stop|restart|config|adduser|deluser|userlist|info}
+	Usage: ngrok.sh deluser {username}
+
+### 开机启动
+想增加开机自启动的，在/etc/rc.local文件中增加：
+
+    /root/ngrok.sh start
 
