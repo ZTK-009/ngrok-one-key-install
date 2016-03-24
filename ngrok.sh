@@ -77,10 +77,10 @@ function start_ngrok_clang(){
         echo ./bin/ngrokd -domain=\"$dns\" -httpAddr=\":$http_port\" -httpsAddr=\":$https_port\" -pass=\"$pass\" -tlsCrt=$srtCRT -tlsKey=$strKey -tunnelAddr=\":$remote_port\"
         nohup ./bin/ngrokd -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port" > ${ngrok_log} 2>&1 &
         echo -e "Ngrok is running..."
-        echo "read ${ngrok_log} for log"
+        echo "read $PWD/${ngrok_log} for log"
     else
         echo -e "Ngrok is running, ngrokd ProcessID is\033[40;32m" ${str_Ngrok_PID}"\033[0m."
-        echo "read ${ngrok_log} for log"
+        echo "read $PWD/${ngrok_log} for log"
     fi
 }
 
