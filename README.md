@@ -11,27 +11,17 @@ Server
 
 Debian / Ubuntu:
 
-    apt-get -y install screen
-    screen -S ngrok_install
-    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ngrok_install.sh
+    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh
     chmod 500 ./ngrok_install.sh
     ./ngrok_install.sh
 
 CentOS:
 
-    yum -y install screen
-    screen -S ngrok_install
-    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ngrok_install.sh
+    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh
     chmod 500 ./ngrok_install.sh
     ./ngrok_install.sh
 
 ### 服务器管理
 
-	Usage: ngrok.sh {start|stop|restart|config|adduser|deluser|userlist|info}
-	Usage: ngrok.sh deluser {username}
-
-### 开机启动
-想增加开机自启动的，在/etc/rc.local文件中增加：
-
-    /root/ngrok.sh start
-
+	Usage: /etc/init.d/ngrokd {start|stop|restart|status|config|adduser|deluser|userlist|info}
+	Usage: /etc/init.d/ngrokd deluser {username}
