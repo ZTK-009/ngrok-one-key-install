@@ -1,8 +1,15 @@
 #!/bin/bash
+#===============================================================================================
+#   System Required:  CentOS Debian or Ubuntu (32bit/64bit)
+#   Description:  Install Ngrok for CentOS Debian or Ubuntu
+#   Author: Clang <admin@clangcn.com>
+#   Intro:  http://clang.cn
+#===============================================================================================
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V4.0"
+version="V5.0"
+str_ngrok_dir="/usr/local/ngrok"
 # Check if user is root
 function rootness(){
     if [[ $EUID -ne 0 ]]; then
@@ -10,9 +17,7 @@ function rootness(){
        exit 1
     fi
 }
-
-get_char()
-{
+function get_char(){
     SAVEDSTTY=`stty -g`
     stty -echo
     stty cbreak
@@ -21,11 +26,10 @@ get_char()
     stty echo
     stty $SAVEDSTTY
 }
-
 function fun_clangcn.com(){
 echo ""
 echo "#######################################################################"
-echo "# On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
+echo "# install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
 echo "# Intro: http://clang.cn/blog/"
 echo "#"
 echo "# Author: Clang <admin@clangcn.com>"
@@ -33,7 +37,6 @@ echo "# version:${version}"
 echo "#######################################################################"
 echo ""
 }
-
 # Check OS
 function checkos(){
     if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
@@ -47,7 +50,6 @@ function checkos(){
         exit 1
     fi
 }
-
 # Get version
 function getversion(){
     if [[ -s /etc/redhat-release ]];then
@@ -56,7 +58,6 @@ function getversion(){
         grep -oE  "[0-9.]+" /etc/issue
     fi    
 }
-
 # CentOS version
 function centosversion(){
     local code=$1
@@ -68,7 +69,6 @@ function centosversion(){
         return 1
     fi        
 }
-
 # Check OS bit
 function check_os_bit(){
     if [[ `getconf WORD_BIT` = '32' && `getconf LONG_BIT` = '64' ]] ; then
@@ -77,14 +77,12 @@ function check_os_bit(){
         Is_64bit='n'
     fi
 }
-
 function check_centosversion(){
 if centosversion 5; then
     echo "Not support CentOS 5.x, please change to CentOS 6,7 or Debian or Ubuntu and try again."
     exit 1
 fi
 }
-
 # Disable selinux
 function disable_selinux(){
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -92,22 +90,29 @@ function disable_selinux(){
         setenforce 0
     fi
 }
-
-
-
 function fun_set_ngrok_domain(){
     # Set ngrok domain
     NGROK_DOMAIN=""
     read -p "Please input domain for Ngrok(e.g.:ngrok.clang.cn):" NGROK_DOMAIN
     check_input
 }
-
+function fun_randstr(){
+  index=0
+  strRandomPass=""
+  for i in {a..z}; do arr[index]=$i; index=`expr ${index} + 1`; done
+  for i in {A..Z}; do arr[index]=$i; index=`expr ${index} + 1`; done
+  for i in {0..9}; do arr[index]=$i; index=`expr ${index} + 1`; done
+  for i in {1..16}; do strRandomPass="$strRandomPass${arr[$RANDOM%$index]}"; done
+  echo $strRandomPass
+}
 function fun_set_ngrok_pass(){
     # Set ngrok pass
-    ngrok_pass=""
-    read -p "Please input password for Ngrok:" ngrok_pass
+    ngrokpass=`fun_randstr`
+    read -p "Please input password for Ngrok(Default Password: ${ngrokpass}):" ngrok_pass
+    if [ "${ngrok_pass}" = "" ]; then
+        ngrok_pass="${ngrokpass}"
+    fi
 }
-
 function check_input(){
     # check ngrok domain
     if [ "$NGROK_DOMAIN" = "" ]; then
@@ -128,9 +133,8 @@ function check_input(){
         pre_install
     fi
 }
-
 function config_runshell_ngrok(){
-cat > /root/.ngrok_config.sh <<EOF
+cat > ${str_ngrok_dir}/.ngrok_config.sh <<EOF
 #!/bin/bash
 # -------------config START-------------
 dns="${NGROK_DOMAIN}"
@@ -140,12 +144,31 @@ https_port=443
 remote_port=4443
 srtCRT=server.crt
 strKey=server.key
+loglevel="INFO"
 # -------------config END-------------
 EOF
-wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok.sh -O /root/ngrok.sh
-chmod 500 /root/ngrok.sh /root/.ngrok_config.sh
-}
 
+if [ ! -s /etc/init.d/ngrokd ]; then
+    if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
+        echo "Failed to download ngrokd.init file!"
+        exit 1
+    fi
+fi
+[ ! -x ${str_ngrok_dir}/.ngrok_config.sh ] && chmod 500 ${str_ngrok_dir}/.ngrok_config.sh
+[ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+if [ "${OS}" == 'CentOS' ]; then
+    if [ -s /etc/init.d/ngrokd ]; then
+        chmod +x /etc/init.d/ngrokd
+        chkconfig --add ngrokd
+    fi
+else
+    if [ -s /etc/init.d/ngrokd ]; then
+        chmod +x /etc/init.d/ngrokd
+        update-rc.d -f ngrokd defaults
+    fi
+fi
+
+}
 function fun_install_ngrok(){
     checkos
     check_centosversion
@@ -153,7 +176,6 @@ function fun_install_ngrok(){
     disable_selinux
     fun_set_ngrok_domain
 }
-
 function pre_install(){
     echo "install ngrok,please wait..."
     if [ "${OS}" == 'CentOS' ]; then
@@ -221,13 +243,13 @@ function pre_install(){
         echo ""
         echo "For more information please visit http://clang.cn/"
         echo ""
-        echo -e "ngrok status manage: \033[45;37m/root/ngrok.sh\033[0m {\033[40;31mstart\033[0m|\033[40;32mstop\033[0m|\033[40;33mrestart\033[0m|\033[40;34mconfig\033[0m|\033[40;35madduser\033[0m|\033[40;36minfo\033[0m}"
+        echo -e "ngrok status manage: \033[45;37m/etc/init.d/ngrokd\033[0m {\033[40;31mstart\033[0m|\033[40;32mstop\033[0m|\033[40;33mrestart\033[0m|\033[40;34mconfig\033[0m|\033[40;35madduser\033[0m|\033[40;36minfo\033[0m}"
         echo -e "Your Domain: \033[32m\033[01m${NGROK_DOMAIN}\033[0m"
         echo -e "Ngrok password: \033[32m\033[01m${ngrok_pass}\033[0m"
         echo -e "http_port: \033[32m\033[01m80\033[0m"
         echo -e "https_port: \033[32m\033[01m443\033[0m"
         echo -e "remote_port: \033[32m\033[01m4443\033[0m"
-        echo -e "Config file:   \033[32m\033[01m/root/.ngrok_config.sh\033[0m"
+        echo -e "Config file:   \033[32m\033[01m${str_ngrok_dir}/.ngrok_config.sh\033[0m"
         echo ""
         echo "========================================================================="
     else
