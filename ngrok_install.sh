@@ -210,9 +210,9 @@ function pre_install(){
     fi
     if [ -s /usr/local/ngrok/bin/ngrokd ]; then
         config_runshell_ngrok
+        /etc/init.d/ngrokd start
         clear
         fun_clangcn.com
-        /etc/init.d/ngrokd start
         echo "Install Ngrok completed! enjoy it."
         echo "========================================================================="
         echo "On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
