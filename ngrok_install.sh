@@ -210,7 +210,6 @@ function pre_install(){
     fi
     if [ -s /usr/local/ngrok/bin/ngrokd ]; then
         config_runshell_ngrok
-        /etc/init.d/ngrokd start
         clear
         fun_clangcn.com
         echo "Install Ngrok completed! enjoy it."
@@ -294,7 +293,7 @@ else
         update-rc.d -f ngrokd defaults
     fi
 fi
-
+/etc/init.d/ngrokd start
 }
 function fun_install_ngrok(){
     checkos
