@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="v5.0"
+version="v5.1"
 manage_port="4446"
 RET_VAL=0
 
