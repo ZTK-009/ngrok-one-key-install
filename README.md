@@ -9,13 +9,7 @@ Server
 
 ### Install
 
-Debian / Ubuntu:
-
-    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh
-    chmod 500 ./ngrok_install.sh
-    ./ngrok_install.sh
-
-CentOS:
+执行命令:
 
     wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh
     chmod 500 ./ngrok_install.sh
