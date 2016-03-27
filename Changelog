@@ -1,5 +1,10 @@
 Ngrok 一键安装脚本 Changelog
 ===========================================
+5.4
+   + Add       增加单用户和多用户配置选项
+   + Add       增加启动时端口是否被占用检测
+5.0
+   + Add       增加开机启动功能
 4.0
    + Add       增加用户管理命令
                Usage: ngrok.sh {start|stop|restart|config|adduser|deluser|userlist|info}
