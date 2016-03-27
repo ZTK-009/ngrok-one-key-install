@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="v5.1"
+version="v5.2"
 manage_port="4446"
 RET_VAL=0
 
@@ -69,6 +69,29 @@ fun_load_config(){
         cd ${ProGramInstallPath}
     fi
 }
+fun_check_port(){
+    fun_load_config
+    strHttpPort=""
+    strHttpsPort=""
+    strRemotePort=""
+    strManPort=""
+    strHttpPort=`netstat -ntl | grep "\b:${http_port}\b"`
+    strHttpsPort=`netstat -ntl | grep "\b:${https_port}\b"`
+    strRemotePort=`netstat -ntl | grep "\b:${remote_port}\b"`
+    strManagePort=`netstat -ntl | grep "\b:${manage_port}\b"`
+    if [ -n "${strHttpPort}" ] || [ -n "${strHttpsPort}" ] || [ -n "${strRemotePort}" ] || [ -n "${strManagePort}" ]; then
+        [ -n "${strHttpPort}" ] && str_http_port="\"${http_port}\""
+        [ -n "${strHttpsPort}" ] && str_https_port="\"${https_port}\""
+        [ -n "${strRemotePort}" ] && str_remote_port="\"${remote_port}\""
+        [ -n "${strManagePort}" ] && str_manage_port="\"${manage_port}\""
+        echo "Error: Port ${str_http_port} ${str_https_port} ${str_remote_port} ${str_manage_port} is used,view relevant port:"
+        [ -n "${strHttpPort}" ] && netstat -ntlp | grep "\b:${http_port}\b"
+        [ -n "${strHttpsPort}" ] && netstat -ntlp | grep "\b:${https_port}\b"
+        [ -n "${strRemotePort}" ] && netstat -ntlp | grep "\b:${remote_port}\b"
+        [ -n "${strManagePort}" ] && netstat -ntlp | grep "\b:${manage_port}\b"
+        return 1
+    fi
+}
 fun_randstr(){
   index=0
   strRandomPass=""
@@ -90,6 +113,7 @@ fun_start()
         echo "${ProgramName} (pid `pidof $NAME`) already running."
         return 0
     fi
+    fun_check_port
     fun_load_config
     echo -n "Starting ${ProgramName}..."
     ${BIN} -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port"${log_level} > ${LOGFILE} 2>&1 &
