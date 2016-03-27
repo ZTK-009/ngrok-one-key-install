@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V5.1"
+version="V5.4"
 str_ngrok_dir="/usr/local/ngrok"
 # Check if user is root
 function rootness(){
@@ -212,6 +212,7 @@ function pre_install(){
         config_runshell_ngrok
         clear
         fun_clangcn.com
+        /etc/init.d/ngrokd start
         echo "Install Ngrok completed! enjoy it."
         echo "========================================================================="
         echo "On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
