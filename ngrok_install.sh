@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V5.0"
+version="V5.1"
 str_ngrok_dir="/usr/local/ngrok"
 # Check if user is root
 function rootness(){
@@ -90,6 +90,25 @@ function disable_selinux(){
         setenforce 0
     fi
 }
+function fun_set_ngrok_user_env(){
+    str_single_user=""
+    echo  -e "\033[33mSetting script environment, single-user or multi-user?\033[0m"
+    read -p "(single-user please input: y,multi-user input N,Default [no]):" str_single_user
+    case "${str_single_user}" in
+    y|Y|Yes|YES|yes|yES|yEs|YeS|yeS)
+    echo "You will set single-user!"
+    str_single_user="y"
+    ;;
+    n|N|No|NO|no|nO)
+    echo "You will set multi-user!"
+    str_single_user="n"
+    ;;
+    *)
+    echo "You will set multi-user!"
+    str_single_user="n"
+    esac
+    fun_set_ngrok_domain
+}
 function fun_set_ngrok_domain(){
     # Set ngrok domain
     NGROK_DOMAIN=""
@@ -132,49 +151,6 @@ function check_input(){
         char=`get_char`
         pre_install
     fi
-}
-function config_runshell_ngrok(){
-cat > ${str_ngrok_dir}/.ngrok_config.sh <<EOF
-#!/bin/bash
-# -------------config START-------------
-dns="${NGROK_DOMAIN}"
-pass="${ngrok_pass}"
-http_port=80
-https_port=443
-remote_port=4443
-srtCRT=server.crt
-strKey=server.key
-loglevel="INFO"
-# -------------config END-------------
-EOF
-
-if [ ! -s /etc/init.d/ngrokd ]; then
-    if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
-        echo "Failed to download ngrokd.init file!"
-        exit 1
-    fi
-fi
-[ ! -x ${str_ngrok_dir}/.ngrok_config.sh ] && chmod 500 ${str_ngrok_dir}/.ngrok_config.sh
-[ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
-if [ "${OS}" == 'CentOS' ]; then
-    if [ -s /etc/init.d/ngrokd ]; then
-        chmod +x /etc/init.d/ngrokd
-        chkconfig --add ngrokd
-    fi
-else
-    if [ -s /etc/init.d/ngrokd ]; then
-        chmod +x /etc/init.d/ngrokd
-        update-rc.d -f ngrokd defaults
-    fi
-fi
-
-}
-function fun_install_ngrok(){
-    checkos
-    check_centosversion
-    check_os_bit
-    disable_selinux
-    fun_set_ngrok_domain
 }
 function pre_install(){
     echo "install ngrok,please wait..."
@@ -266,6 +242,65 @@ function pre_install(){
     min_distance=$(expr ${hour_remainder} / 60) ;
     min_remainder=$(expr ${hour_remainder} % 60) ;
     echo -e "Shell run time is \033[32m \033[01m${hour_distance} hour ${min_distance} min ${min_remainder} sec\033[0m"
+}
+function config_runshell_ngrok(){
+if [ "${str_single_user}" == 'y' ] ; then
+cat > ${str_ngrok_dir}/.ngrok_config.sh <<EOF
+#!/bin/bash
+# -------------config START-------------
+dns="${NGROK_DOMAIN}"
+pass="${ngrok_pass}"
+http_port=80
+https_port=443
+remote_port=4443
+srtCRT=server.crt
+strKey=server.key
+loglevel="INFO"
+SingleUser="y"
+# -------------config END-------------
+EOF
+else
+cat > ${str_ngrok_dir}/.ngrok_config.sh <<EOF
+#!/bin/bash
+# -------------config START-------------
+dns="${NGROK_DOMAIN}"
+pass="${ngrok_pass}"
+http_port=80
+https_port=443
+remote_port=4443
+srtCRT=server.crt
+strKey=server.key
+loglevel="INFO"
+SingleUser="n"
+# -------------config END-------------
+EOF
+fi 
+
+if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
+    echo "Failed to download ngrokd.init file!"
+    exit 1
+fi
+[ ! -x ${str_ngrok_dir}/.ngrok_config.sh ] && chmod 500 ${str_ngrok_dir}/.ngrok_config.sh
+[ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+if [ "${OS}" == 'CentOS' ]; then
+    if [ -s /etc/init.d/ngrokd ]; then
+        chmod +x /etc/init.d/ngrokd
+        chkconfig --add ngrokd
+    fi
+else
+    if [ -s /etc/init.d/ngrokd ]; then
+        chmod +x /etc/init.d/ngrokd
+        update-rc.d -f ngrokd defaults
+    fi
+fi
+
+}
+function fun_install_ngrok(){
+    checkos
+    check_centosversion
+    check_os_bit
+    disable_selinux
+    fun_set_ngrok_user_env
 }
 clear
 fun_clangcn.com
