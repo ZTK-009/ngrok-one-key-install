@@ -89,6 +89,7 @@ fun_check_port(){
         [ -n "${strHttpsPort}" ] && netstat -ntlp | grep "\b:${https_port}\b"
         [ -n "${strRemotePort}" ] && netstat -ntlp | grep "\b:${remote_port}\b"
         [ -n "${strManagePort}" ] && netstat -ntlp | grep "\b:${manage_port}\b"
+        echo "start failed"
         return 1
     fi
 }
@@ -113,9 +114,9 @@ fun_start()
         echo "${ProgramName} (pid `pidof $NAME`) already running."
         return 0
     fi
+    echo -n "Starting ${ProgramName}..."
     fun_check_port
     fun_load_config
-    echo -n "Starting ${ProgramName}..."
     ${BIN} -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port"${log_level} > ${LOGFILE} 2>&1 &
     PID=`pidof ${NAME}`
     echo $PID > $PID_FILE
