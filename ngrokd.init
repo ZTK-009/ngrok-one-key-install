@@ -182,16 +182,29 @@ check_ngrok_subdomain(){
     else
         fun_load_config
         ddns=(${subdomain})
-        [ -n "${ddns[0]}" ] && subdns=\"${ddns[0]}.${userName}\"
-        [ -n "${ddns[1]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\"
-        [ -n "${ddns[2]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\"
-        [ -n "${ddns[3]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\",\"${ddns[3]}.${userName}\"
-        [ -n "${ddns[4]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\",\"${ddns[3]}.${userName}\",\"${ddns[4]}.${userName}\"
-        [ -n "${ddns[0]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\"
-        [ -n "${ddns[1]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\"
-        [ -n "${ddns[2]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\"
-        [ -n "${ddns[3]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\",\"${ddns[3]}.${userName}.${dns}\"
-        [ -n "${ddns[4]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\",\"${ddns[3]}.${userName}.${dns}\",\"${ddns[4]}.${userName}.${dns}\"
+        if [ "$SingleUser" = "y" ] || [ "$SingleUser" = "1" ]; then
+            [ -n "${ddns[0]}" ] && subdns=\"${ddns[0]}\"
+            [ -n "${ddns[1]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\"
+            [ -n "${ddns[2]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\"
+            [ -n "${ddns[3]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\"
+            [ -n "${ddns[4]}" ] && subdns=\"${ddns[0]}\",\"${ddns[1]}\",\"${ddns[2]}\",\"${ddns[3]}\",\"${ddns[4]}\"
+            [ -n "${ddns[0]}" ] && FQDN=\"${ddns[0]}.${dns}\"
+            [ -n "${ddns[1]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\"
+            [ -n "${ddns[2]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\"
+            [ -n "${ddns[3]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\"
+            [ -n "${ddns[4]}" ] && FQDN=\"${ddns[0]}.${dns}\",\"${ddns[1]}.${dns}\",\"${ddns[2]}.${dns}\",\"${ddns[3]}.${dns}\",\"${ddns[4]}.${dns}\"
+        else
+            [ -n "${ddns[0]}" ] && subdns=\"${ddns[0]}.${userName}\"
+            [ -n "${ddns[1]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\"
+            [ -n "${ddns[2]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\"
+            [ -n "${ddns[3]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\",\"${ddns[3]}.${userName}\"
+            [ -n "${ddns[4]}" ] && subdns=\"${ddns[0]}.${userName}\",\"${ddns[1]}.${userName}\",\"${ddns[2]}.${userName}\",\"${ddns[3]}.${userName}\",\"${ddns[4]}.${userName}\"
+            [ -n "${ddns[0]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\"
+            [ -n "${ddns[1]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\"
+            [ -n "${ddns[2]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\"
+            [ -n "${ddns[3]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\",\"${ddns[3]}.${userName}.${dns}\"
+            [ -n "${ddns[4]}" ] && FQDN=\"${ddns[0]}.${userName}.${dns}\",\"${ddns[1]}.${userName}.${dns}\",\"${ddns[2]}.${userName}.${dns}\",\"${ddns[3]}.${userName}.${dns}\",\"${ddns[4]}.${userName}.${dns}\"
+        fi
         echo "Your subdomain: ${subdns}"
         fun_set_ngrok_authId
     fi
