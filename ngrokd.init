@@ -247,11 +247,12 @@ check_ngrok_authId(){
 fun_adduser_command(){
     fun_load_config
     clear
+    fun_clangcn
     echo  curl -H \"Content-Type: application/json\" -H \"Auth:${pass}\" -X POST -d \''{'\"userId\":\"${strPassword}\",\"authId\":\"${userName}\",\"dns\":[${subdns}]'}'\' http://localhost:${manage_port}/adduser >${ProGramInstallPath}/.ngrok_adduser.sh
     chmod +x ${ProGramInstallPath}/.ngrok_adduser.sh
     . ${ProGramInstallPath}/.ngrok_adduser.sh
     rm -f ${ProGramInstallPath}/.ngrok_adduser.sh
-    fun_clangcn
+    echo ""
     echo "User list :"
     curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:${manage_port}/info
     echo "============================================================="
