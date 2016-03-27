@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="v5.4"
+version="v5.2"
 manage_port="4446"
 RET_VAL=0
 
@@ -246,11 +246,11 @@ check_ngrok_authId(){
 }
 fun_adduser_command(){
     fun_load_config
+    clear
     echo  curl -H \"Content-Type: application/json\" -H \"Auth:${pass}\" -X POST -d \''{'\"userId\":\"${strPassword}\",\"authId\":\"${userName}\",\"dns\":[${subdns}]'}'\' http://localhost:${manage_port}/adduser >${ProGramInstallPath}/.ngrok_adduser.sh
     chmod +x ${ProGramInstallPath}/.ngrok_adduser.sh
     . ${ProGramInstallPath}/.ngrok_adduser.sh
     rm -f ${ProGramInstallPath}/.ngrok_adduser.sh
-    clear
     fun_clangcn
     echo "User list :"
     curl -H "Content-Type: application/json" -H "Auth:${pass}" -X GET http://localhost:${manage_port}/info
