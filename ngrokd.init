@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="v5.3"
+version="v5.4"
 manage_port="4446"
 RET_VAL=0
 
@@ -157,7 +157,7 @@ fun_status(){
     if netstat -tnpl | grep -q ${NAME}; then
         PID=`pidof ${NAME}`
         echo "${ProgramName} (pid $PID) is running..."
-        netstat -tnpl | grep -q ${NAME}
+        netstat -tnpl | grep "${NAME}"
     else
         echo "${ProgramName} is stopped"
         exit 0
