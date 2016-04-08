@@ -157,6 +157,7 @@ fun_status(){
     if netstat -tnpl | grep -q ${NAME}; then
         PID=`pidof ${NAME}`
         echo "${ProgramName} (pid $PID) is running..."
+        netstat -tnpl | grep -q ${NAME}
     else
         echo "${ProgramName} is stopped"
         exit 0
