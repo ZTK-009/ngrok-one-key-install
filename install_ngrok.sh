@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V1.0"
+version="V1.1"
 str_ngrok_dir="/usr/local/ngrok"
 # Check if user is root
 function rootness(){
