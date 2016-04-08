@@ -161,7 +161,7 @@ function pre_install(){
         apt-get update -y
         apt-get install -y wget build-essential mercurial nano curl openssl libcurl4-openssl-dev
     fi
-    mkdir -p ${str_ngrok_dir}
+    [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
     # Download shadowsocks chkconfig file
     if [ "${Is_64bit}" == 'y' ] ; then
