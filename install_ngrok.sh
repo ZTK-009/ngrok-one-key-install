@@ -8,13 +8,26 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V1.1"
+version="V2.0"
 str_ngrok_dir="/usr/local/ngrok"
+
+function fun_clang.cn(){
+echo ""
+echo "#######################################################################"
+echo "# install Ngrok for Debian/Ubuntu/CentOS Linux Server"
+echo "# Intro: http://clang.cn/blog/"
+echo "#"
+echo "# Author: Clang <admin@clangcn.com>"
+echo "# version:${version}"
+echo "#######################################################################"
+echo ""
+}
 # Check if user is root
 function rootness(){
     if [[ $EUID -ne 0 ]]; then
-       echo "Error:This script must be run as root!" 1>&2
-       exit 1
+        fun_clang.cn
+        echo "Error:This script must be run as root!" 1>&2
+        exit 1
     fi
 }
 function get_char(){
@@ -25,17 +38,6 @@ function get_char(){
     stty -raw
     stty echo
     stty $SAVEDSTTY
-}
-function fun_clangcn.com(){
-echo ""
-echo "#######################################################################"
-echo "# install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
-echo "# Intro: http://clang.cn/blog/"
-echo "#"
-echo "# Author: Clang <admin@clangcn.com>"
-echo "# version:${version}"
-echo "#######################################################################"
-echo ""
 }
 # Check OS
 function checkos(){
@@ -156,14 +158,14 @@ function pre_install(){
     echo "install ngrok,please wait..."
     if [ "${OS}" == 'CentOS' ]; then
         #yum -y update
-        yum -y install unzip nano net-tools zlib-devel openssl-devel perl hg cpio expat-devel gettext-devel curl curl-devel perl-ExtUtils-MakeMaker wget gcc gcc-c++
+        yum -y install nano net-tools openssl-devel curl curl-devel psmisc wget
     else
         apt-get update -y
-        apt-get install -y wget build-essential mercurial nano curl openssl libcurl4-openssl-dev
+        apt-get install -y wget build-essential mercurial nano curl psmisc openssl libcurl4-openssl-dev
     fi
     [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
-    # Download shadowsocks chkconfig file
+    # Download ngrok file
     if [ "${Is_64bit}" == 'y' ] ; then
         if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
             if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86_64 -O ${str_ngrok_dir}/bin/ngrokd; then
@@ -179,18 +181,17 @@ function pre_install(){
             fi
         fi
     fi
-    [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
-    cd /usr/local/ngrok
-    openssl genrsa -out rootCA.key 2048
-    openssl req -x509 -new -nodes -key rootCA.key -subj "/CN=$NGROK_DOMAIN" -days 5000 -out rootCA.pem
-    openssl genrsa -out server.key 2048
-    openssl req -new -key server.key -subj "/CN=$NGROK_DOMAIN" -out server.csr
-    openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 5000
-
     if [ -s ${str_ngrok_dir}/bin/ngrokd ]; then
+        [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
+        cd ${str_ngrok_dir}
+        openssl genrsa -out rootCA.key 2048
+        openssl req -x509 -new -nodes -key rootCA.key -subj "/CN=$NGROK_DOMAIN" -days 5000 -out rootCA.pem
+        openssl genrsa -out server.key 2048
+        openssl req -new -key server.key -subj "/CN=$NGROK_DOMAIN" -out server.csr
+        openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 5000
         config_runshell_ngrok
         clear
-        fun_clangcn.com
+        fun_clang.cn
         echo "Install Ngrok completed! enjoy it."
         echo "========================================================================="
         echo "On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
@@ -206,7 +207,9 @@ function pre_install(){
         echo -e "remote_port: \033[32m\033[01m4443\033[0m"
         echo -e "Config file:   \033[32m\033[01m${str_ngrok_dir}/.ngrok_config.sh\033[0m"
         echo ""
+        /etc/init.d/ngrokd start
         echo "========================================================================="
+        exit 0
     else
         echo ""
         echo "Sorry,Failed to install Ngrok!"
@@ -272,18 +275,194 @@ else
         update-rc.d -f ngrokd defaults
     fi
 fi
-/etc/init.d/ngrokd start
 }
+function check_nano(){
+    nano -V
+    #echo $?
+    if [[ $? -le 1 ]] ;then
+        echo " Run nano success"
+    else
+        echo " Run nano failed"
+        if [ "${OS}" == 'CentOS' ]; then
+            echo " Install  centos nano ..."
+            #yum -y update
+            yum -y install nano
+        else
+            echo " Install  debian/ubuntu nano ..."
+            apt-get update -y
+            apt-get install -y nano
+        fi
+    fi
+    # if [[ ! -d "$result" ]]; then
+        # echo "not found"
+    # else
+        # echo "found"
+    # fi
+    echo $result
+}
+function check_killall(){
+    killall -V
+    #echo $?
+    if [[ $? -le 1 ]] ;then
+        echo " Run killall success"
+    else
+        echo " Run killall failed"
+        if [ "${OS}" == 'CentOS' ]; then
+            echo " Install  centos killall ..."
+            #yum -y update
+            yum -y install psmisc
+        else
+            echo " Install  debian/ubuntu killall ..."
+            apt-get update -y
+            apt-get install -y psmisc
+        fi
+    fi
+    # if [[ ! -d "$result" ]]; then
+        # echo "not found"
+    # else
+        # echo "found"
+    # fi
+    echo $result
+}
+############################### uninstall function ##################################
 function fun_install_ngrok(){
+    fun_clang.cn
     checkos
     check_centosversion
     check_os_bit
     disable_selinux
-    fun_set_ngrok_user_env
+    if [ -s ${str_ngrok_dir}/bin/ngrokd ] && [ -s /etc/init.d/ngrokd ]; then
+        echo "Ngrok is installed!"
+    else
+        fun_set_ngrok_user_env
+    fi
+}
+function fun_configure_ngrok(){
+    check_nano
+    if [ -s ${str_ngrok_dir}/.ngrok_config.sh ]; then
+        nano ${str_ngrok_dir}/.ngrok_config.sh
+    else
+        echo "Ngrok configuration file not found!"
+    fi
+}
+function fun_uninstall_ngrok(){
+    fun_clang.cn
+    if [ -s ${str_ngrok_dir}/bin/ngrokd ] && [ -s /etc/init.d/ngrokd ]; then
+        echo "============== Uninstall Ngrok =============="
+        save_config="n"
+        echo  -e "\033[33mDo you want to keep the configuration file?\033[0m"
+        read -p "(if you want please input: y,Default [no]):" save_config
+
+        case "${save_config}" in
+        y|Y|Yes|YES|yes|yES|yEs|YeS|yeS)
+        echo ""
+        echo "You will keep the configuration file!"
+        save_config="y"
+        ;;
+        n|N|No|NO|no|nO)
+        echo ""
+        echo "You will NOT to keep the configuration file!"
+        save_config="n"
+        ;;
+        *)
+        echo ""
+        echo "will NOT to keep the configuration file!"
+        save_config="n"
+        esac
+        checkos
+        /etc/init.d/ngrokd stop
+        if [ "${OS}" == 'CentOS' ]; then
+            chkconfig --del ngrokd
+        else
+            update-rc.d -f ngrokd remove
+        fi
+        rm -f /etc/init.d/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_update.log
+        if [ "${save_config}" == 'n' ]; then
+            rm -fr ${str_ngrok_dir}
+        else
+            rm -fr ${str_ngrok_dir}/bin/ ${str_ngrok_dir}/ngrok.log ${str_ngrok_dir}/rootCA.* ${str_ngrok_dir}/server.*
+        fi
+        echo "Ngrok uninstall success!"
+    else
+        echo "Ngrok Not install!"
+    fi
+    echo ""
+}
+function fun_update_ngrok(){
+    fun_clang.cn
+    if [ -s ${str_ngrok_dir}/bin/ngrokd ] && [ -s /etc/init.d/ngrokd ]; then
+        echo "============== Update Ngrok =============="
+        checkos
+        check_centosversion
+        check_os_bit
+        check_killall
+        killall ngrokd
+        [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+        rm -f ${str_ngrok_dir}/bin/ngrokd /etc/init.d/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+        cd ${str_ngrok_dir}
+        # Download ngrok file
+        if [ "${Is_64bit}" == 'y' ] ; then
+            if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
+                if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86_64 -O ${str_ngrok_dir}/bin/ngrokd; then
+                    echo "Failed to download ngrokd.x86_64 file!"
+                    exit 1
+                fi
+            fi
+        else
+             if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
+                if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86 -O ${str_ngrok_dir}/bin/ngrokd; then
+                    echo "Failed to download ngrokd.x86 file!"
+                    exit 1
+                fi
+            fi
+        fi
+        [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
+        if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
+            echo "Failed to download ngrokd.init file!"
+            exit 1
+        fi
+        [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+        if [ "${OS}" == 'CentOS' ]; then
+            if [ -s /etc/init.d/ngrokd ]; then
+                chmod +x /etc/init.d/ngrokd
+                chkconfig --add ngrokd
+            fi
+        else
+            if [ -s /etc/init.d/ngrokd ]; then
+                chmod +x /etc/init.d/ngrokd
+                update-rc.d -f ngrokd defaults
+            fi
+        fi
+        clear
+        /etc/init.d/ngrokd start
+        echo "Ngrok update success!"
+    else
+        echo "Ngrok Not install!"
+    fi
+    echo ""
 }
 clear
-fun_clangcn.com
 rootness
-rm -f /root/ngrok_install.log
-fun_install_ngrok 2>&1 | tee /root/ngrok_install.log
-exit 0
+
+action=$1
+[  -z $1 ]
+case "$action" in
+install)
+    rm -f /root/ngrok_install.log
+    fun_install_ngrok 2>&1 | tee /root/ngrok_install.log
+    ;;
+config)
+    fun_configure_ngrok
+    ;;
+uninstall)
+    fun_uninstall_ngrok 2>&1 | tee /root/ngrok_uninstall.log
+    ;;
+update)
+    fun_update_ngrok 2>&1 | tee /root/ngrok_update.log
+    ;;
+*)
+    fun_clang.cn
+    echo "Arguments error! [${action} ]"
+    echo "Usage: `basename $0` {install|uninstall|update|config}"
+    ;;
+esac
