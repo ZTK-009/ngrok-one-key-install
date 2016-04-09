@@ -163,6 +163,18 @@ fun_status(){
         exit 0
     fi
 }
+checkos(){
+    if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
+        OS=CentOS
+    elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
+        OS=Debian
+    elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
+        OS=Ubuntu
+    else
+        echo "Not support OS, Please reinstall OS and retry!"
+        exit 1
+    fi
+}
 check_nano(){
     nano -V
     #echo $?
@@ -170,6 +182,7 @@ check_nano(){
         echo " Run nano success"
     else
         echo " Run nano failed"
+        checkos
         if [ "${OS}" == 'CentOS' ]; then
             echo " Install  centos nano ..."
             #yum -y update
