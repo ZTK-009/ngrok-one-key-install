@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="v5.4"
+version="v5.5"
 manage_port="4446"
 RET_VAL=0
 
@@ -163,8 +163,37 @@ fun_status(){
         exit 0
     fi
 }
+check_nano(){
+    nano -V
+    #echo $?
+    if [[ $? -le 1 ]] ;then
+        echo " Run nano success"
+    else
+        echo " Run nano failed"
+        if [ "${OS}" == 'CentOS' ]; then
+            echo " Install  centos nano ..."
+            #yum -y update
+            yum -y install nano
+        else
+            echo " Install  debian/ubuntu nano ..."
+            apt-get update -y
+            apt-get install -y nano
+        fi
+    fi
+    # if [[ ! -d "$result" ]]; then
+        # echo "not found"
+    # else
+        # echo "found"
+    # fi
+    echo $result
+}
 fun_config(){
-    nano ${CONFIGFILE}
+    check_nano
+    if [ -s ${CONFIGFILE} ]; then
+        nano ${CONFIGFILE}
+    else
+        echo "${ProgramName} configuration file not found!"
+    fi
 }
 fun_set_ngrok_username(){
     userName=""
