@@ -155,7 +155,8 @@ function check_input(){
     fi
 }
 function pre_install(){
-    echo "install ngrok,please wait..."
+    echo "Install ngrok,please wait..."
+    echo "============== Install packs =============="
     if [ "${OS}" == 'CentOS' ]; then
         #yum -y update
         yum -y install nano net-tools openssl-devel curl curl-devel psmisc wget
