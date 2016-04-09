@@ -189,7 +189,7 @@ check_nano(){
             yum -y install nano
         else
             echo " Install  debian/ubuntu nano ..."
-            apt-get update -y
+            #apt-get update -y
             apt-get install -y nano
         fi
     fi
