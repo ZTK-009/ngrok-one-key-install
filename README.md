@@ -6,16 +6,21 @@
 安装平台：CentOS、Debian、Ubuntu。
 Server
 ------
-
 ### Install
-
-执行命令:
-
-    wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh
-    chmod 500 ./ngrok_install.sh
-    ./ngrok_install.sh
-
+执行命令：
+```Bash
+wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/install_ngrok.sh -O ./install_ngrok.sh
+chmod 500 ./install_ngrok.sh
+./install_ngrok.sh install	
+```
 ### 服务器管理
 
 	Usage: /etc/init.d/ngrokd {start|stop|restart|status|config|adduser|deluser|userlist|info}
 	Usage: /etc/init.d/ngrokd deluser {username}
+
+~~*### 自己编译安装*~~
+
+~~*执行命令:*~~
+~~*wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrok_install.sh -O ./ngrok_install.sh*~~
+~~*chmod 500 ./ngrok_install.sh*~~
+~~*./ngrok_install.sh*~~
