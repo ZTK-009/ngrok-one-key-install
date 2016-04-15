@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V2.0"
+version="V2.1"
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
@@ -276,6 +276,7 @@ else
         update-rc.d -f ngrokd defaults
     fi
 fi
+[ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
 }
 function check_nano(){
     nano -V
@@ -377,7 +378,7 @@ function fun_uninstall_ngrok(){
         else
             update-rc.d -f ngrokd remove
         fi
-        rm -f /etc/init.d/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_update.log
+        rm -f /etc/init.d/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_update.log
         if [ "${save_config}" == 'n' ]; then
             rm -fr ${str_ngrok_dir}
         else
@@ -399,7 +400,7 @@ function fun_update_ngrok(){
         check_killall
         killall ngrokd
         [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
-        rm -f ${str_ngrok_dir}/bin/ngrokd /etc/init.d/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+        rm -f ${str_ngrok_dir}/bin/ngrokd /etc/init.d/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
         cd ${str_ngrok_dir}
         # Download ngrok file
         if [ "${Is_64bit}" == 'y' ] ; then
