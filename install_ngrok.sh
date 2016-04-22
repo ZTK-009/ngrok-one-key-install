@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V2.1"
+version="V2.2"
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
@@ -274,6 +274,8 @@ else
     if [ -s /etc/init.d/ngrokd ]; then
         chmod +x /etc/init.d/ngrokd
         update-rc.d -f ngrokd defaults
+        sed -i 's/#TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
+        sed -i 's/TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
     fi
 fi
 [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
