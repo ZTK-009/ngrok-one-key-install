@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V2.2"
+version="V2.3"
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
@@ -426,6 +426,7 @@ function fun_update_ngrok(){
             exit 1
         fi
         [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+        [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
         if [ "${OS}" == 'CentOS' ]; then
             if [ -s /etc/init.d/ngrokd ]; then
                 chmod +x /etc/init.d/ngrokd
