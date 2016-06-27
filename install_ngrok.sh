@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V2.3"
+version="V2.4"
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
@@ -95,7 +95,7 @@ function disable_selinux(){
 function fun_set_ngrok_user_env(){
     str_single_user=""
     echo  -e "\033[33mSetting script environment, single-user or multi-user?\033[0m"
-    read -p "(single-user please input: y,multi-user input N,Default [no]):" str_single_user
+    read -p "(single-user please input: y,multi-user input: n,Default [Y]):" str_single_user
     case "${str_single_user}" in
     y|Y|Yes|YES|yes|yES|yEs|YeS|yeS)
     echo "You will set single-user!"
@@ -106,8 +106,8 @@ function fun_set_ngrok_user_env(){
     str_single_user="n"
     ;;
     *)
-    echo "You will set multi-user!"
-    str_single_user="n"
+    echo "You will set single-user!"
+    str_single_user="y"
     esac
     fun_set_ngrok_domain
 }
