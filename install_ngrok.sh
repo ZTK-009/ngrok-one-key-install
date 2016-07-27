@@ -74,9 +74,9 @@ function checkos(){
 function getversion(){
     if [[ -s /etc/redhat-release ]];then
         grep -oE  "[0-9.]+" /etc/redhat-release
-    else    
+    else
         grep -oE  "[0-9.]+" /etc/issue
-    fi    
+    fi
 }
 # CentOS version
 function centosversion(){
@@ -87,7 +87,7 @@ function centosversion(){
         return 0
     else
         return 1
-    fi        
+    fi
 }
 # Check OS bit
 function check_os_bit(){
@@ -537,4 +537,3 @@ update)
     echo "Usage: `basename $0` {install|uninstall|update|config}"
     ;;
 esac
-
