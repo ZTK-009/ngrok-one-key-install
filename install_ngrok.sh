@@ -8,7 +8,15 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V2.4"
+version="V3.0"
+
+program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
+x64_file=server_ngrokd_linux_amd64
+x86_file=server_ngrokd_linux_386
+md5sum_file=md5sum.md
+program_init_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/ngrokd.init
+str_install_shell=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/install_ngrok.sh
+
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
@@ -38,6 +46,16 @@ function get_char(){
     stty -raw
     stty echo
     stty $SAVEDSTTY
+}
+function fun_set_text_color(){
+    COLOR_RED='\E[1;31m'
+    COLOR_GREEN='\E[1;32m'
+    COLOR_YELOW='\E[1;33m'
+    COLOR_BLUE='\E[1;34m'
+    COLOR_PINK='\E[1;35m'
+    COLOR_PINKBACK_WHITEFONT='\033[45;37m'
+    COLOR_GREEN_LIGHTNING='\033[32m \033[05m'
+    COLOR_END='\E[0m'
 }
 # Check OS
 function checkos(){
@@ -78,6 +96,23 @@ function check_os_bit(){
     else
         Is_64bit='n'
     fi
+}
+function check_curl(){
+    curl -V >/dev/null
+    if [[ $? -le 1 ]] ;then
+        echo " Run curl success"
+    else
+        echo " Run curl failed"
+        if [ "${OS}" == 'CentOS' ]; then
+            echo " Install centos curl ..."
+            yum -y install curl curl-devel
+        else
+            echo " Install debian/ubuntu curl ..."
+            apt-get update -y
+            apt-get install -y curl
+        fi
+    fi
+    echo $result
 }
 function check_centosversion(){
 if centosversion 5; then
@@ -140,7 +175,7 @@ function check_input(){
         echo -e "Your input is empty,please input again..."
         fun_set_ngrok_domain
     else
-        echo -e "Your domain: \033[41;37m "${NGROK_DOMAIN}" \033[0m."
+        echo -e "Your domain: ${COLOR_PINKBACK_WHITEFONT} "${NGROK_DOMAIN}" ${COLOR_END}."
         fun_set_ngrok_pass
     fi
     # check ngrok pass
@@ -148,11 +183,41 @@ function check_input(){
         echo -e "Your input is empty,please input again..."
         fun_set_ngrok_pass
     else
-        echo -e "Your ngrok pass: \033[41;37m "${ngrok_pass}" \033[0m."
-        echo -e "\033[32m \033[05mPress any key to start...or Press Ctrl+c to cancel\033[0m"
+        echo -e "Your ngrok pass: ${COLOR_PINKBACK_WHITEFONT} "${ngrok_pass}" ${COLOR_END}."
+        echo -e "${COLOR_GREEN_LIGHTNING}Press any key to start...or Press Ctrl+c to cancel${COLOR_END}"
         char=`get_char`
         pre_install
     fi
+}
+function fun_download_file(){
+    [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+    program_file=""
+    if [ "${Is_64bit}" == 'y' ] ; then
+        program_file=${x64_file}
+        if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
+            if ! wget --no-check-certificate ${program_download_url}${program_file} -O ${str_ngrok_dir}/bin/ngrokd; then
+                echo "Failed to download ${program_file} file!"
+                exit 1
+            fi
+        fi
+    else
+        program_file=${x86_file}
+        if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
+            if ! wget --no-check-certificate ${program_download_url}${program_file} -O ${str_ngrok_dir}/bin/ngrokd; then
+                echo "Failed to download ${program_file} file!"
+                exit 1
+            fi
+        fi
+    fi
+    check_curl
+    check_md5sum
+    md5_web=`curl -s ${program_download_url}${md5sum_file} | sed  -n "/${program_file}/p" | awk '{print $1}'`
+    local_md5=`md5sum ${str_ngrok_dir}/bin/ngrokd | awk '{print $1}'`
+    if [ "${local_md5}" != "${md5_web}" ]; then
+        echo "md5sum not match,Failed to download ${program_file} file!"
+        exit 1
+    fi
+    [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
 }
 function pre_install(){
     echo "Install ngrok,please wait..."
@@ -167,23 +232,8 @@ function pre_install(){
     [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
     # Download ngrok file
-    if [ "${Is_64bit}" == 'y' ] ; then
-        if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
-            if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86_64 -O ${str_ngrok_dir}/bin/ngrokd; then
-                echo "Failed to download ngrokd.x86_64 file!"
-                exit 1
-            fi
-        fi
-    else
-         if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
-            if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86 -O ${str_ngrok_dir}/bin/ngrokd; then
-                echo "Failed to download ngrokd.x86 file!"
-                exit 1
-            fi
-        fi
-    fi
+    fun_download_file
     if [ -s ${str_ngrok_dir}/bin/ngrokd ]; then
-        [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
         cd ${str_ngrok_dir}
         openssl genrsa -out rootCA.key 2048
         openssl req -x509 -new -nodes -key rootCA.key -subj "/CN=$NGROK_DOMAIN" -days 5000 -out rootCA.pem
@@ -200,13 +250,13 @@ function pre_install(){
         echo ""
         echo "For more information please visit http://clang.cn/"
         echo ""
-        echo -e "ngrok status manage: \033[45;37m/etc/init.d/ngrokd\033[0m {\033[40;31mstart\033[0m|\033[40;32mstop\033[0m|\033[40;33mrestart\033[0m|\033[40;34mconfig\033[0m|\033[40;35madduser\033[0m|\033[40;36minfo\033[0m}"
-        echo -e "Your Domain: \033[32m\033[01m${NGROK_DOMAIN}\033[0m"
-        echo -e "Ngrok password: \033[32m\033[01m${ngrok_pass}\033[0m"
-        echo -e "http_port: \033[32m\033[01m80\033[0m"
-        echo -e "https_port: \033[32m\033[01m443\033[0m"
-        echo -e "remote_port: \033[32m\033[01m4443\033[0m"
-        echo -e "Config file:   \033[32m\033[01m${str_ngrok_dir}/.ngrok_config.sh\033[0m"
+        echo -e "ngrok status manage: ${COLOR_PINKBACK_WHITEFONT}/etc/init.d/ngrokd${COLOR_END} {${COLOR_GREEN}start${COLOR_END}|${COLOR_PINK}stop${COLOR_END}|${COLOR_YELOW}restart${COLOR_END}|${COLOR_BLUE}config${COLOR_END}|${COLOR_RED}adduser${COLOR_END}|${COLOR_GREEN}info${COLOR_END}}"
+        echo -e "Your Domain: ${COLOR_GREEN}${NGROK_DOMAIN}${COLOR_END}"
+        echo -e "Ngrok password: ${COLOR_GREEN}${ngrok_pass}${COLOR_END}"
+        echo -e "http_port: ${COLOR_GREEN}80${COLOR_END}"
+        echo -e "https_port: ${COLOR_GREEN}443${COLOR_END}"
+        echo -e "remote_port: ${COLOR_GREEN}4443${COLOR_END}"
+        echo -e "Config file:   ${COLOR_GREEN}${str_ngrok_dir}/.ngrok_config.sh${COLOR_END}"
         echo ""
         /etc/init.d/ngrokd start
         echo "========================================================================="
@@ -224,7 +274,7 @@ function pre_install(){
     hour_remainder=$(expr ${time_distance} % 3600) ;
     min_distance=$(expr ${hour_remainder} / 60) ;
     min_remainder=$(expr ${hour_remainder} % 60) ;
-    echo -e "Shell run time is \033[32m \033[01m${hour_distance} hour ${min_distance} min ${min_remainder} sec\033[0m"
+    echo -e "Shell run time is ${COLOR_GREEN}${hour_distance} hour ${min_distance} min ${min_remainder} sec${COLOR_END}"
 }
 function config_runshell_ngrok(){
 if [ "${str_single_user}" == 'y' ] ; then
@@ -259,7 +309,7 @@ SingleUser="n"
 EOF
 fi 
 
-if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
+if ! wget --no-check-certificate ${program_init_download_url} -O /etc/init.d/ngrokd; then
     echo "Failed to download ngrokd.init file!"
     exit 1
 fi
@@ -401,30 +451,45 @@ function fun_update_ngrok(){
         check_os_bit
         check_killall
         killall ngrokd
-        [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
-        rm -f ${str_ngrok_dir}/bin/ngrokd /etc/init.d/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+        remote_shell_version=`curl -s ${str_install_shell} | sed -n '/'^version'/p' | cut -d\" -f2`
+        remote_init_version=`curl -s ${program_init_download_url} | sed -n '/'^version'/p' | cut -d\" -f2`
+        local_init_version=`sed -n '/'^version'/p' /etc/init.d/ngrokd | cut -d\" -f2`
+        install_shell=${strPath}
         cd ${str_ngrok_dir}
+        if [ ! -z ${remote_shell_version} ] || [ ! -z ${remote_init_version} ];then
+            update_flag="false"
+            if [[ "${version}" < "${remote_shell_version}" ]];then
+                echo "========== Update ngrokd install_ngrok.sh =========="
+                if ! wget --no-check-certificate ${str_install_shell} -O ${install_shell}/install_ngrok.sh; then
+                    echo "Failed to download install_ngrok.sh file!"
+                    exit 1
+                else
+                    echo -e "${COLOR_GREEN}install_ngrok.sh Update successfully !!!${COLOR_END}"
+                    update_flag="true"
+                fi
+            fi
+            if [[ "${local_init_version}" < "${remote_init_version}" ]];then
+                echo "========== Update ngrokd /etc/init.d/ngrokd =========="
+                if ! wget --no-check-certificate ${program_init_download_url} -O /etc/init.d/ngrokd; then
+                    echo "Failed to download ngrokd.init file!"
+                    exit 1
+                else
+                    echo -e "${COLOR_GREEN}/etc/init.d/ngrokd Update successfully !!!${COLOR_END}"
+                    update_flag="true"
+                fi
+            fi
+            if [ "${update_flag}" == 'true' ]; then
+                echo -e "${COLOR_GREEN}Update shell successfully !!!${COLOR_END}"
+                echo ""
+                echo -e "${COLOR_GREEN}Please Re-run${COLOR_END} ${COLOR_PINKBACK_WHITEFONT}$0 update${COLOR_END}"
+                echo ""
+                exit 1
+            fi
+        fi
+        [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+        rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
         # Download ngrok file
-        if [ "${Is_64bit}" == 'y' ] ; then
-            if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
-                if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86_64 -O ${str_ngrok_dir}/bin/ngrokd; then
-                    echo "Failed to download ngrokd.x86_64 file!"
-                    exit 1
-                fi
-            fi
-        else
-             if [ ! -s ${str_ngrok_dir}/bin/ngrokd ]; then
-                if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd/ngrokd.x86 -O ${str_ngrok_dir}/bin/ngrokd; then
-                    echo "Failed to download ngrokd.x86 file!"
-                    exit 1
-                fi
-            fi
-        fi
-        [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
-        if ! wget --no-check-certificate https://github.com/clangcn/ngrok-one-key-install/raw/master/ngrokd.init -O /etc/init.d/ngrokd; then
-            echo "Failed to download ngrokd.init file!"
-            exit 1
-        fi
+        fun_download_file
         [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
         [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
         if [ "${OS}" == 'CentOS' ]; then
@@ -448,7 +513,8 @@ function fun_update_ngrok(){
 }
 clear
 rootness
-
+strPath=`pwd`
+fun_set_text_color
 action=$1
 [  -z $1 ]
 case "$action" in
@@ -471,3 +537,4 @@ update)
     echo "Usage: `basename $0` {install|uninstall|update|config}"
     ;;
 esac
+
