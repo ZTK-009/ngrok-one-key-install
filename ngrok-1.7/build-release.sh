@@ -48,4 +48,14 @@ for os in ${OSES[@]}; do
                 if $UPX; then upx -9 ${shpath}/bin/client_ngrok_${os}_${arch}${suffix} ${shpath}/bin/server_ngrokd_${os}_${arch}${suffix};fi
         done
 done
+# ARM
+ARMS=(5 6 7)
+for v in ${ARMS[@]}; do
+        env GOGC=100 CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=$v make release-server
+        mv ${shpath}/bin/linux_arm/ngrokd ${shpath}/bin/server_ngrokd_linux_arm$v
+        env GOGC=100 CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=$v  make release-client
+        mv ${shpath}/bin/linux_arm/ngrok ${shpath}/bin/client_ngrok_linux_arm$v
+done
+rm -fr ${shpath}/bin/linux_arm/
+if $UPX; then upx -9 client_ngrok_linux_arm* server_ngrokd_linux_arm*;fi
 rm -f ${shpath}/bin/go-bindata
