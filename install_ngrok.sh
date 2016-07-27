@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="V3.0"
+version="3.0"
 
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
