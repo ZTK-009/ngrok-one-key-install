@@ -14,9 +14,9 @@ function check_os_bit(){
 }
 check_os_bit
 UPX=false
-if hash upx 2>/dev/null; then
-        UPX=true
-fi
+#if hash upx 2>/dev/null; then
+#        UPX=true
+#fi
 shpath=`pwd`
 cd ${shpath}
 OSES=(linux darwin windows freebsd)
