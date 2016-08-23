@@ -30,7 +30,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/ngrok_clang.pid
-version="6.0"
+version="7.0"
 manage_port="4446"
 RET_VAL=0
 
@@ -39,13 +39,11 @@ RET_VAL=0
 fun_clangcn()
 {
     echo ""
-    echo "#############################################################"
-    echo "#  Manager Ngrok v${version} for CentOS/Debian/Ubuntu (32bit/64bit)"
-    echo "#  Intro: http://clang.cn"
-    echo "#"
-    echo "#  Author: Clang <admin@clangcn.com>"
-    echo "#"
-    echo "#############################################################"
+    echo "+----------------------------------------------+"
+    echo "|      Manager for Ngrok, Written by Clang     |"
+    echo "+----------------------------------------------+"
+    echo "|            Intro: http://clang.cn/           |"
+    echo "+----------------------------------------------+"
     echo ""
 }
 
@@ -176,11 +174,8 @@ checkos(){
     fi
 }
 check_nano(){
-    nano -V
-    #echo $?
-    if [[ $? -le 1 ]] ;then
-        echo " Run nano success"
-    else
+    nano -V >/dev/null
+    if [[ $? -gt 1 ]] ;then
         echo " Run nano failed"
         checkos
         if [ "${OS}" == 'CentOS' ]; then
@@ -193,11 +188,6 @@ check_nano(){
             apt-get install -y nano
         fi
     fi
-    # if [[ ! -d "$result" ]]; then
-        # echo "not found"
-    # else
-        # echo "found"
-    # fi
     echo $result
 }
 fun_config(){
@@ -355,7 +345,7 @@ deluser_Confirm_clang(){
         if [ $strConfirmDel = "y" ]; then
             if [ -s "/tmp/db-diskv/ng/ro/ngrok:${strDelUser}" ]; then
                 rm -f /tmp/db-diskv/ng/ro/ngrok:${strDelUser}
-                echo "Delete user ${strDelUser}¡¡ok! Restart ${NAME}..."
+                echo "Delete user ${strDelUser}ã€€ok! Restart ${NAME}..."
                 fun_restart
             else
                 echo ""
@@ -394,4 +384,3 @@ case "${arg1}" in
     ;;
 esac
 exit $RET_VAL
-
