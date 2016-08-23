@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="3.0"
+version="4.0"
 
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
@@ -20,15 +20,15 @@ str_install_shell=https://raw.githubusercontent.com/clangcn/ngrok-one-key-instal
 str_ngrok_dir="/usr/local/ngrok"
 
 function fun_clang.cn(){
-echo ""
-echo "#######################################################################"
-echo "# install Ngrok for Debian/Ubuntu/CentOS Linux Server"
-echo "# Intro: http://clang.cn/blog/"
-echo "#"
-echo "# Author: Clang <admin@clangcn.com>"
-echo "# version:${version}"
-echo "#######################################################################"
-echo ""
+    echo ""
+    echo "+------------------------------------------------------------+"
+    echo "|         Ngrok for Linux Server, Written by Clang           |"
+    echo "+------------------------------------------------------------+"
+    echo "|     A tool to auto-compile & install Ngrok on Linux        |"
+    echo "+------------------------------------------------------------+"
+    echo "| Author: Clang <admin@clang.cn>  | Intro: http://clang.cn/  |"
+    echo "+------------------------------------------------------------+"
+    echo ""
 }
 # Check if user is root
 function rootness(){
@@ -99,9 +99,7 @@ function check_os_bit(){
 }
 function check_curl(){
     curl -V >/dev/null
-    if [[ $? -le 1 ]] ;then
-        echo " Run curl success"
-    else
+    if [[ $? -gt 1 ]] ;then
         echo " Run curl failed"
         if [ "${OS}" == 'CentOS' ]; then
             echo " Install centos curl ..."
@@ -111,6 +109,13 @@ function check_curl(){
             apt-get update -y
             apt-get install -y curl
         fi
+    fi
+    echo $result
+}
+function check_md5sum(){
+    md5sum --version >/dev/null
+    if [[ $? -gt 6 ]] ;then
+        echo " Run md5sum failed"
     fi
     echo $result
 }
@@ -331,51 +336,33 @@ fi
 [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
 }
 function check_nano(){
-    nano -V
-    #echo $?
-    if [[ $? -le 1 ]] ;then
-        echo " Run nano success"
-    else
+    nano -V >/dev/null
+    if [[ $? -gt 1 ]] ;then
         echo " Run nano failed"
         if [ "${OS}" == 'CentOS' ]; then
-            echo " Install  centos nano ..."
-            #yum -y update
+            echo " Install centos nano ..."
             yum -y install nano
         else
-            echo " Install  debian/ubuntu nano ..."
+            echo " Install debian/ubuntu nano ..."
             apt-get update -y
             apt-get install -y nano
         fi
     fi
-    # if [[ ! -d "$result" ]]; then
-        # echo "not found"
-    # else
-        # echo "found"
-    # fi
     echo $result
 }
 function check_killall(){
-    killall -V
-    #echo $?
-    if [[ $? -le 1 ]] ;then
-        echo " Run killall success"
-    else
+    killall -V 2>/dev/null
+    if [[ $? -gt 1 ]] ;then
         echo " Run killall failed"
         if [ "${OS}" == 'CentOS' ]; then
-            echo " Install  centos killall ..."
-            #yum -y update
+            echo " Install centos killall ..."
             yum -y install psmisc
         else
-            echo " Install  debian/ubuntu killall ..."
+            echo " Install debian/ubuntu killall ..."
             apt-get update -y
             apt-get install -y psmisc
         fi
     fi
-    # if [[ ! -d "$result" ]]; then
-        # echo "not found"
-    # else
-        # echo "found"
-    # fi
     echo $result
 }
 ############################### uninstall function ##################################
@@ -449,8 +436,6 @@ function fun_update_ngrok(){
         checkos
         check_centosversion
         check_os_bit
-        check_killall
-        killall ngrokd
         remote_shell_version=`curl -s ${str_install_shell} | sed -n '/'^version'/p' | cut -d\" -f2`
         remote_init_version=`curl -s ${program_init_download_url} | sed -n '/'^version'/p' | cut -d\" -f2`
         local_init_version=`sed -n '/'^version'/p' /etc/init.d/ngrokd | cut -d\" -f2`
@@ -488,6 +473,8 @@ function fun_update_ngrok(){
         fi
         if [ "${update_flag}" == 'false' ]; then
             [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+            check_killall
+            killall ngrokd
             rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
             # Download ngrok file
             fun_download_file
