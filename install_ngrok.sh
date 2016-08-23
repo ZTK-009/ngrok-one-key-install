@@ -456,18 +456,8 @@ function fun_update_ngrok(){
         local_init_version=`sed -n '/'^version'/p' /etc/init.d/ngrokd | cut -d\" -f2`
         install_shell=${strPath}
         cd ${str_ngrok_dir}
+        update_flag="false"
         if [ ! -z ${remote_shell_version} ] || [ ! -z ${remote_init_version} ];then
-            update_flag="false"
-            if [[ "${version}" < "${remote_shell_version}" ]];then
-                echo "========== Update ngrokd install_ngrok.sh =========="
-                if ! wget --no-check-certificate ${str_install_shell} -O ${install_shell}/install_ngrok.sh; then
-                    echo "Failed to download install_ngrok.sh file!"
-                    exit 1
-                else
-                    echo -e "${COLOR_GREEN}install_ngrok.sh Update successfully !!!${COLOR_END}"
-                    update_flag="true"
-                fi
-            fi
             if [[ "${local_init_version}" < "${remote_init_version}" ]];then
                 echo "========== Update ngrokd /etc/init.d/ngrokd =========="
                 if ! wget --no-check-certificate ${program_init_download_url} -O /etc/init.d/ngrokd; then
@@ -475,6 +465,16 @@ function fun_update_ngrok(){
                     exit 1
                 else
                     echo -e "${COLOR_GREEN}/etc/init.d/ngrokd Update successfully !!!${COLOR_END}"
+                    update_flag="true"
+                fi
+            fi
+            if [[ "${version}" < "${remote_shell_version}" ]];then
+                echo "========== Update ngrokd install_ngrok.sh =========="
+                if ! wget --no-check-certificate ${str_install_shell} -O ${install_shell}/$0; then
+                    echo "Failed to download install_ngrok.sh file!"
+                    exit 1
+                else
+                    echo -e "${COLOR_GREEN}install_ngrok.sh Update successfully !!!${COLOR_END}"
                     update_flag="true"
                 fi
             fi
@@ -486,26 +486,28 @@ function fun_update_ngrok(){
                 exit 1
             fi
         fi
-        [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
-        rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
-        # Download ngrok file
-        fun_download_file
-        [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
-        [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
-        if [ "${OS}" == 'CentOS' ]; then
-            if [ -s /etc/init.d/ngrokd ]; then
-                chmod +x /etc/init.d/ngrokd
-                chkconfig --add ngrokd
+        if [ "${update_flag}" == 'false' ]; then
+            [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+            rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+            # Download ngrok file
+            fun_download_file
+            [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+            [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
+            if [ "${OS}" == 'CentOS' ]; then
+                if [ -s /etc/init.d/ngrokd ]; then
+                    chmod +x /etc/init.d/ngrokd
+                    chkconfig --add ngrokd
+                fi
+            else
+                if [ -s /etc/init.d/ngrokd ]; then
+                    chmod +x /etc/init.d/ngrokd
+                    update-rc.d -f ngrokd defaults
+                fi
             fi
-        else
-            if [ -s /etc/init.d/ngrokd ]; then
-                chmod +x /etc/init.d/ngrokd
-                update-rc.d -f ngrokd defaults
-            fi
+            clear
+            /etc/init.d/ngrokd start
+            echo "Ngrok update success!"
         fi
-        clear
-        /etc/init.d/ngrokd start
-        echo "Ngrok update success!"
     else
         echo "Ngrok Not install!"
     fi
