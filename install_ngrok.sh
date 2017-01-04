@@ -475,11 +475,11 @@ function fun_update_ngrok(){
                     exit 1
                 else
                     echo -e "${COLOR_GREEN}/etc/init.d/ngrokd Update successfully !!!${COLOR_END}"
-                    [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
-                    [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
                 fi
             fi
         fi
+        [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+        [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
         [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
         ps -ef | grep -v grep | grep -i "${str_ngrok_dir}/bin/ngrokd" > /dev/null 2>&1
         if [ $? -eq 0 ]; then
