@@ -18,7 +18,12 @@
 # Short-Description: starts the ngrok
 # Description:       starts ngrok using start-stop
 ### END INIT INFO
-
+# Source function library
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+# Check that networking is up.
+    [ ${NETWORKING} ="yes" ] || exit 0
+fi
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 ProgramName="Ngrok"
 ProGramInstallPath="/usr/local/ngrok"
@@ -29,13 +34,19 @@ CONFIGFILE=${ProGramInstallPath}/.ngrok_config.sh
 LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
-PID_FILE=$PID_DIR/ngrok_clang.pid
-version="7.0"
+PID_FILE=${PID_DIR}/ngrok_clang.pid
+version="8.0"
 manage_port="4446"
 RET_VAL=0
 
 [ -x $BIN ] || exit 0
-
+if [ ! -d $PID_DIR ]; then
+    mkdir -p $PID_DIR
+    if [ $? -ne 0 ]; then
+        echo "Creating PID directory $PID_DIR failed"
+        exit 1
+    fi
+fi
 fun_clangcn()
 {
     echo ""
@@ -46,16 +57,15 @@ fun_clangcn()
     echo "+----------------------------------------------+"
     echo ""
 }
-
-fun_check_run()
-{
-    if netstat -tnpl | grep -q ${NAME};then
+fun_check_run() {
+    PID=`ps -ef | grep -v grep | grep -i "${BIN}" | awk '{print $2}'`
+    if [ ! -z $PID ]; then
         return 0
     else
-        rm -f $PID_FILE
         return 1
     fi
 }
+
 fun_load_config(){    
     if [ ! -r ${CONFIGFILE} ]; then
         echo "config file ${CONFIGFILE} not found"
@@ -108,25 +118,28 @@ fun_start()
     if [ ! -d $PID_DIR ]; then
         mkdir -p $PID_DIR || echo "failed creating PID directory ${PID_DIR}"; exit 1
     fi
-    if fun_check_run; then
-        echo "${ProgramName} (pid `pidof $NAME`) already running."
-        return 0
+    if [ -f ${PID_FILE} ]; then
+        read PID < ${PID_FILE}
+        echo "$NAME (pid $PID) is already running..."
+        exit 0
     fi
-    echo -n "Starting ${ProgramName}..."
+    echo -n "Starting ${ProgramName}: "
     fun_check_port
     fun_load_config
     ${BIN} -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port"${log_level} > ${LOGFILE} 2>&1 &
-    PID=`pidof ${NAME}`
-    echo $PID > $PID_FILE
-    sleep 0.3
-    if ! fun_check_run; then
-        echo "start failed"
-        return 1
+    RETVAL=$?
+    PID=$(ps -ef | grep -v grep | grep -i ${BIN} | awk '{print $2}')
+    echo ${PID} > ${PID_FILE}
+    if [ -f /etc/rc.d/init.d/functions ]; then
+        [ $RETVAL -eq 0 ] && success
+    else
+        if fun_check_run; then
+            echo "    [ok]"
+        else
+            echo "    [FAILED]"
+            RETVAL=1
+        fi
     fi
-    echo " done"
-    echo "${ProgramName} (pid `pidof $NAME`)is running."
-    echo "read ${LOGFILE} for log"
-    return 0
 }
 
 fun_stop(){
@@ -134,32 +147,41 @@ fun_stop(){
       fun_clangcn
     fi
     if fun_check_run; then
-        echo -n "Stoping ${ProgramName} (pid `pidof $NAME`)... "
-        kill `pidof $NAME`
-        if [ "$?" != 0 ] ; then
-            echo " failed"
-            exit 1
+        echo -n $"Stopping ${ProgramName}: "
+        if [ -f /etc/rc.d/init.d/functions ]; then
+            killproc -p $PID_FILE >/dev/null 2>&1
         else
-            echo " done"
-            rm -f $PID_FILE
+            if fun_check_run; then
+                kill -9 $PID >/dev/null 2>&1
+                echo "    [ok]"
+            else
+                echo "    [FAILED]"
+                RETVAL=1
+            fi
         fi
+        RETVAL=$?
+        [ $RETVAL -eq 0 ]
+        rm -f $PID_FILE
     else
         echo "${ProgramName} is not running."
     fi
 }
+
 fun_restart(){
     fun_stop
     fun_start
 }
 fun_status(){
-    if netstat -tnpl | grep -q ${NAME}; then
-        PID=`pidof ${NAME}`
-        echo "${ProgramName} (pid $PID) is running..."
-        netstat -tnpl | grep "${NAME}"
-    else
-        echo "${ProgramName} is stopped"
-        exit 0
-    fi
+    fun_check_run
+    case $? in
+        0)
+        echo "$NAME (pid $PID) is running..."
+        ;;
+        1|2)
+        echo "$NAME is stopped"
+        RET_VAL=1
+        ;;
+    esac
 }
 checkos(){
     if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
@@ -173,27 +195,9 @@ checkos(){
         exit 1
     fi
 }
-check_nano(){
-    nano -V >/dev/null
-    if [[ $? -gt 1 ]] ;then
-        echo " Run nano failed"
-        checkos
-        if [ "${OS}" == 'CentOS' ]; then
-            echo " Install  centos nano ..."
-            #yum -y update
-            yum -y install nano
-        else
-            echo " Install  debian/ubuntu nano ..."
-            apt-get update -y
-            apt-get install -y nano
-        fi
-    fi
-    echo $result
-}
 fun_config(){
-    check_nano
     if [ -s ${CONFIGFILE} ]; then
-        nano ${CONFIGFILE}
+        vi ${CONFIGFILE}
     else
         echo "${ProgramName} configuration file not found!"
     fi
