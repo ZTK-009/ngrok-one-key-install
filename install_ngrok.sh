@@ -8,32 +8,69 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="4.0"
-
+version="4.1"
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
 x86_file=server_ngrokd_linux_386
 md5sum_file=md5sum.md
 program_init_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/ngrokd.init
 str_install_shell=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/install_ngrok.sh
-
 str_ngrok_dir="/usr/local/ngrok"
-
-function fun_clang.cn(){
+contact_us="http://koolshare.cn/forum-72-1.html"
+function shell_update(){
+    fun_clangcn "clear"
+    echo "Check updates for shell..."
+    remote_shell_version=`wget --no-check-certificate -qO- ${str_install_shell} | sed -n '/'^version'/p' | cut -d\" -f2`
+    if [ ! -z ${remote_shell_version} ]; then
+        if [[ "${version}" != "${remote_shell_version}" ]];then
+            echo -e "${COLOR_GREEN}Found a new version,update now!!!${COLOR_END}"
+            echo
+            echo -n "Update shell ..."
+            if ! wget --no-check-certificate -qO $0 ${str_install_shell}; then
+                echo -e " [${COLOR_RED}failed${COLOR_END}]"
+                echo
+                exit 1
+            else
+                echo -e " [${COLOR_GREEN}OK${COLOR_END}]"
+                echo
+                echo -e "${COLOR_GREEN}Please Re-run${COLOR_END} ${COLOR_PINK}$0 ${action}${COLOR_END}"
+                echo
+                exit 1
+            fi
+            exit 1
+        fi
+    fi
+}
+function fun_clangcn(){
+    local clear_flag=""
+    clear_flag=$1
+    if [[ ${clear_flag} == "clear" ]]; then
+        clear
+    fi
     echo ""
     echo "+------------------------------------------------------------+"
     echo "|         Ngrok for Linux Server, Written by Clang           |"
     echo "+------------------------------------------------------------+"
     echo "|     A tool to auto-compile & install Ngrok on Linux        |"
     echo "+------------------------------------------------------------+"
-    echo "| Author: Clang <admin@clang.cn>  | Intro: http://clang.cn/  |"
+    echo "|         Intro: http://koolshare.cn/forum-72-1.html         |"
     echo "+------------------------------------------------------------+"
     echo ""
+}
+function fun_set_text_color(){
+    COLOR_RED='\E[1;31m'
+    COLOR_GREEN='\E[1;32m'
+    COLOR_YELOW='\E[1;33m'
+    COLOR_BLUE='\E[1;34m'
+    COLOR_PINK='\E[1;35m'
+    COLOR_PINKBACK_WHITEFONT='\033[45;37m'
+    COLOR_GREEN_LIGHTNING='\033[32m \033[05m'
+    COLOR_END='\E[0m'
 }
 # Check if user is root
 function rootness(){
     if [[ $EUID -ne 0 ]]; then
-        fun_clang.cn
+        fun_clangcn
         echo "Error:This script must be run as root!" 1>&2
         exit 1
     fi
@@ -46,16 +83,6 @@ function get_char(){
     stty -raw
     stty echo
     stty $SAVEDSTTY
-}
-function fun_set_text_color(){
-    COLOR_RED='\E[1;31m'
-    COLOR_GREEN='\E[1;32m'
-    COLOR_YELOW='\E[1;33m'
-    COLOR_BLUE='\E[1;34m'
-    COLOR_PINK='\E[1;35m'
-    COLOR_PINKBACK_WHITEFONT='\033[45;37m'
-    COLOR_GREEN_LIGHTNING='\033[32m \033[05m'
-    COLOR_END='\E[0m'
 }
 # Check OS
 function checkos(){
@@ -247,7 +274,7 @@ function pre_install(){
         openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 5000
         config_runshell_ngrok
         clear
-        fun_clang.cn
+        fun_clangcn
         echo "Install Ngrok completed! enjoy it."
         echo "========================================================================="
         echo "On key install Ngrok ${version} for Debian/Ubuntu/CentOS Linux Server"
@@ -367,7 +394,7 @@ function check_killall(){
 }
 ############################### uninstall function ##################################
 function fun_install_ngrok(){
-    fun_clang.cn
+    fun_clangcn
     checkos
     check_centosversion
     check_os_bit
@@ -387,7 +414,7 @@ function fun_configure_ngrok(){
     fi
 }
 function fun_uninstall_ngrok(){
-    fun_clang.cn
+    fun_clangcn
     if [ -s ${str_ngrok_dir}/bin/ngrokd ] && [ -s /etc/init.d/ngrokd ]; then
         echo "============== Uninstall Ngrok =============="
         save_config="n"
@@ -430,71 +457,54 @@ function fun_uninstall_ngrok(){
     echo ""
 }
 function fun_update_ngrok(){
-    fun_clang.cn
+    fun_clangcn
     if [ -s ${str_ngrok_dir}/bin/ngrokd ] && [ -s /etc/init.d/ngrokd ]; then
         echo "============== Update Ngrok =============="
         checkos
         check_centosversion
         check_os_bit
-        remote_shell_version=`curl -s ${str_install_shell} | sed -n '/'^version'/p' | cut -d\" -f2`
         remote_init_version=`curl -s ${program_init_download_url} | sed -n '/'^version'/p' | cut -d\" -f2`
         local_init_version=`sed -n '/'^version'/p' /etc/init.d/ngrokd | cut -d\" -f2`
         install_shell=${strPath}
         cd ${str_ngrok_dir}
-        update_flag="false"
-        if [ ! -z ${remote_shell_version} ] || [ ! -z ${remote_init_version} ];then
-            if [[ "${local_init_version}" < "${remote_init_version}" ]];then
+        if [ ! -z ${remote_init_version} ];then
+            if [[ "${local_init_version}" != "${remote_init_version}" ]];then
                 echo "========== Update ngrokd /etc/init.d/ngrokd =========="
                 if ! wget --no-check-certificate ${program_init_download_url} -O /etc/init.d/ngrokd; then
                     echo "Failed to download ngrokd.init file!"
                     exit 1
                 else
                     echo -e "${COLOR_GREEN}/etc/init.d/ngrokd Update successfully !!!${COLOR_END}"
-                    update_flag="true"
+                    [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
+                    [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
                 fi
-            fi
-            if [[ "${version}" < "${remote_shell_version}" ]];then
-                echo "========== Update ngrokd install_ngrok.sh =========="
-                if ! wget --no-check-certificate ${str_install_shell} -O ${install_shell}/$0; then
-                    echo "Failed to download install_ngrok.sh file!"
-                    exit 1
-                else
-                    echo -e "${COLOR_GREEN}install_ngrok.sh Update successfully !!!${COLOR_END}"
-                    update_flag="true"
-                fi
-            fi
-            if [ "${update_flag}" == 'true' ]; then
-                echo -e "${COLOR_GREEN}Update shell successfully !!!${COLOR_END}"
-                echo ""
-                echo -e "${COLOR_GREEN}Please Re-run${COLOR_END} ${COLOR_PINKBACK_WHITEFONT}$0 update${COLOR_END}"
-                echo ""
-                exit 1
             fi
         fi
-        if [ "${update_flag}" == 'false' ]; then
-            [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+        [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
+        ps -ef | grep -v grep | grep -i "${str_ngrok_dir}/bin/ngrokd" > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            /etc/init.d/ngrokd stop
+        else
             check_killall
             killall ngrokd
-            rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
-            # Download ngrok file
-            fun_download_file
-            [ ! -x /etc/init.d/ngrokd ] && chmod 755 /etc/init.d/ngrokd
-            [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
-            if [ "${OS}" == 'CentOS' ]; then
-                if [ -s /etc/init.d/ngrokd ]; then
-                    chmod +x /etc/init.d/ngrokd
-                    chkconfig --add ngrokd
-                fi
-            else
-                if [ -s /etc/init.d/ngrokd ]; then
-                    chmod +x /etc/init.d/ngrokd
-                    update-rc.d -f ngrokd defaults
-                fi
-            fi
-            clear
-            /etc/init.d/ngrokd start
-            echo "Ngrok update success!"
         fi
+        rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+        # Download ngrok file
+        fun_download_file
+        if [ "${OS}" == 'CentOS' ]; then
+            if [ -s /etc/init.d/ngrokd ]; then
+                chmod +x /etc/init.d/ngrokd
+                chkconfig --add ngrokd
+            fi
+        else
+            if [ -s /etc/init.d/ngrokd ]; then
+                chmod +x /etc/init.d/ngrokd
+                update-rc.d -f ngrokd defaults
+            fi
+        fi
+        clear
+        /etc/init.d/ngrokd start
+        echo "Ngrok update success!"
     else
         echo "Ngrok Not install!"
     fi
@@ -505,6 +515,7 @@ rootness
 strPath=`pwd`
 fun_set_text_color
 action=$1
+shell_update
 [  -z $1 ]
 case "$action" in
 install)
@@ -521,7 +532,7 @@ update)
     fun_update_ngrok 2>&1 | tee /root/ngrok_update.log
     ;;
 *)
-    fun_clang.cn
+    fun_clangcn
     echo "Arguments error! [${action} ]"
     echo "Usage: `basename $0` {install|uninstall|update|config}"
     ;;
