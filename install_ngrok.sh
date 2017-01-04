@@ -488,7 +488,7 @@ function fun_update_ngrok(){
             check_killall
             killall ngrokd
         fi
-        rm -f ${str_ngrok_dir}/bin/ngrokd /usr/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
+        rm -f ${str_ngrok_dir}/bin/ngrokd /var/run/ngrok_clang.pid /root/ngrok_install.log /root/ngrok_uninstall.log
         # Download ngrok file
         fun_download_file
         if [ "${OS}" == 'CentOS' ]; then
