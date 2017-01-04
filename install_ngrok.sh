@@ -532,7 +532,7 @@ update)
     fun_update_ngrok 2>&1 | tee /root/ngrok_update.log
     ;;
 *)
-    fun_clangcn
+    fun_clangcn "clear"
     echo "Arguments error! [${action} ]"
     echo "Usage: `basename $0` {install|uninstall|update|config}"
     ;;
