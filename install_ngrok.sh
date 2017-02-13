@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="4.1"
+version="4.2"
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
 x86_file=server_ngrokd_linux_386
@@ -125,7 +125,7 @@ function check_os_bit(){
     fi
 }
 function check_curl(){
-    curl -V >/dev/null
+    curl -V >/dev/null 2>&1
     if [[ $? -gt 1 ]] ;then
         echo " Run curl failed"
         if [ "${OS}" == 'CentOS' ]; then
@@ -140,7 +140,7 @@ function check_curl(){
     echo $result
 }
 function check_md5sum(){
-    md5sum --version >/dev/null
+    md5sum --version >/dev/null 2>&1
     if [[ $? -gt 6 ]] ;then
         echo " Run md5sum failed"
     fi
@@ -241,14 +241,14 @@ function fun_download_file(){
             fi
         fi
     fi
-    check_curl
-    check_md5sum
-    md5_web=`curl -s ${program_download_url}${md5sum_file} | sed  -n "/${program_file}/p" | awk '{print $1}'`
-    local_md5=`md5sum ${str_ngrok_dir}/bin/ngrokd | awk '{print $1}'`
-    if [ "${local_md5}" != "${md5_web}" ]; then
-        echo "md5sum not match,Failed to download ${program_file} file!"
-        exit 1
-    fi
+    #check_curl
+    #check_md5sum
+    #md5_web=`curl -s ${program_download_url}${md5sum_file} | sed  -n "/${program_file}/p" | awk '{print $1}'`
+    #local_md5=`md5sum ${str_ngrok_dir}/bin/ngrokd | awk '{print $1}'`
+    #if [ "${local_md5}" != "${md5_web}" ]; then
+    #    echo "md5sum not match,Failed to download ${program_file} file!"
+    #    exit 1
+    #fi
     [ ! -x ${str_ngrok_dir}/bin/ngrokd ] && chmod 755 ${str_ngrok_dir}/bin/ngrokd
 }
 function pre_install(){
@@ -259,7 +259,7 @@ function pre_install(){
         yum -y install nano net-tools openssl-devel curl curl-devel psmisc wget
     else
         apt-get update -y
-        apt-get install -y wget build-essential mercurial nano curl psmisc openssl libcurl4-openssl-dev
+        apt-get install -y wget build-essential mercurial nano curl psmisc openssl libcurl4-openssl-dev net-tools
     fi
     [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
