@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="4.3"
+version="4.4"
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
 x86_file=server_ngrokd_linux_386
@@ -256,10 +256,10 @@ function pre_install(){
     echo "============== Install packs =============="
     if [ "${OS}" == 'CentOS' ]; then
         #yum -y update
-        yum -y install net-tools openssl-devel psmisc wget vim
+        yum -y install net-tools openssl-devel psmisc wget vim curl curl-devel
     else
         apt-get update -y
-        apt-get install -y wget build-essential mercurial vim psmisc openssl libcurl4-openssl-dev net-tools
+        apt-get install -y wget build-essential mercurial curl vim psmisc openssl libcurl4-openssl-dev net-tools
     fi
     [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
