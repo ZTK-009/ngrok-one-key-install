@@ -1,3 +1,5 @@
+###在此非常感谢[koolshare](http://koolshare.cn/forum-72-1.html)的[小宝](http://koolshare.cn/space-uid-2380.html)宝大对ngrok进行的二次开发。
+<<<<<<< HEAD
 # ngrok - Introspected tunnels to localhost ([homepage](https://ngrok.com))
 ### "I want to securely expose a web server to the internet and capture all traffic for detailed inspection and replay"
 ![](https://ngrok.com/static/img/overview.png)
@@ -29,6 +31,14 @@ are only available by creating an account on ngrok.com. If you need them, [creat
 - [Mac OSX](https://dl.ngrok.com/darwin_386/ngrok.zip)
 - [Windows](https://dl.ngrok.com/windows_386/ngrok.zip)
 
+## Install
+- One click Install ngrok
+
+wget http://soft.clang.cn/ngrok/ngrok_install.sh && bash ./ngrok_install.sh
+
 
 ## Developing on ngrok
 [ngrok developer's guide](docs/DEVELOPMENT.md)
+=======
+# ngrok-1.7
+>>>>>>> 53880af91e43e3044c6b056f63886e3f41442422

@@ -35,7 +35,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=${PID_DIR}/ngrok_clang.pid
-version="8.0"
+version="8.1"
 manage_port="4446"
 RET_VAL=0
 
@@ -347,8 +347,8 @@ deluser_Confirm_clang(){
         strConfirmDel="n"
         esac
         if [ $strConfirmDel = "y" ]; then
-            if [ -s "/tmp/db-diskv/ng/ro/ngrok:${strDelUser}" ]; then
-                rm -f /tmp/db-diskv/ng/ro/ngrok:${strDelUser}
+            if [ -s "${ProGramInstallPath}/users/ng/ro/ngrok:${strDelUser}" ]; then
+                rm -f ${ProGramInstallPath}/users/ng/ro/ngrok:${strDelUser}
                 echo "Delete user ${strDelUser}　ok! Restart ${NAME}..."
                 fun_restart
             else
@@ -363,7 +363,7 @@ deluser_Confirm_clang(){
 fun_userlist(){
     fun_clangcn
     echo "Ngrok user list:"
-    ls /tmp/db-diskv/ng/ro/ |cut -d ':' -f 2
+    ls ${ProGramInstallPath}/users/ng/ro/ |cut -d ':' -f 2
 }
 fun_info(){
     fun_clangcn
@@ -388,3 +388,4 @@ case "${arg1}" in
     ;;
 esac
 exit $RET_VAL
+

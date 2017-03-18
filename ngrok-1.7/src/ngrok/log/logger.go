@@ -3,7 +3,7 @@ package log
 import (
 	"fmt"
 
-	log "code.google.com/p/log4go"
+	log "github.com/keepeye/log4go"
 )
 
 var root log.Logger = make(log.Logger)

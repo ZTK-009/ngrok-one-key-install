@@ -312,7 +312,7 @@ func CheckForLogin(authMsg *msg.Auth) *UserInfo {
 }
 
 func NewConfigMgr() *ConfigMgr {
-	path := "/tmp/db-diskv"
+	path := "./users"
 
 	diskv := diskv.New(diskv.Options{
 		BasePath:     path,

@@ -8,7 +8,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 shell_run_start=`date "+%Y-%m-%d %H:%M:%S"`   #shell run start time
-version="4.2"
+version="4.3"
 program_download_url=https://raw.githubusercontent.com/clangcn/ngrok-one-key-install/master/latest/
 x64_file=server_ngrokd_linux_amd64
 x86_file=server_ngrokd_linux_386
@@ -256,10 +256,10 @@ function pre_install(){
     echo "============== Install packs =============="
     if [ "${OS}" == 'CentOS' ]; then
         #yum -y update
-        yum -y install nano net-tools openssl-devel curl curl-devel psmisc wget
+        yum -y install net-tools openssl-devel psmisc wget vim
     else
         apt-get update -y
-        apt-get install -y wget build-essential mercurial nano curl psmisc openssl libcurl4-openssl-dev net-tools
+        apt-get install -y wget build-essential mercurial vim psmisc openssl libcurl4-openssl-dev net-tools
     fi
     [ ! -d ${str_ngrok_dir}/bin/ ] && mkdir -p ${str_ngrok_dir}/bin/
     cd ${str_ngrok_dir}
@@ -356,8 +356,8 @@ else
     if [ -s /etc/init.d/ngrokd ]; then
         chmod +x /etc/init.d/ngrokd
         update-rc.d -f ngrokd defaults
-        sed -i 's/#TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
-        sed -i 's/TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
+        #sed -i 's/#TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
+        #sed -i 's/TMPTIME=.*/TMPTIME=-1/' /etc/default/rcS
     fi
 fi
 [ -s /etc/init.d/ngrokd ] && ln -s /etc/init.d/ngrokd /usr/bin/ngrokd
@@ -463,7 +463,7 @@ function fun_update_ngrok(){
         checkos
         check_centosversion
         check_os_bit
-        remote_init_version=`curl -s ${program_init_download_url} | sed -n '/'^version'/p' | cut -d\" -f2`
+        remote_init_version=`wget --no-check-certificate -qO- ${program_init_download_url} | sed -n '/'^version'/p' | cut -d\" -f2`
         local_init_version=`sed -n '/'^version'/p' /etc/init.d/ngrokd | cut -d\" -f2`
         install_shell=${strPath}
         cd ${str_ngrok_dir}
@@ -502,6 +502,9 @@ function fun_update_ngrok(){
                 update-rc.d -f ngrokd defaults
             fi
         fi
+        if [ -d /tmp/db-diskv/ng/ro/ ]; then
+            mv /tmp/db-diskv/ ${str_ngrok_dir}/users/
+        fi
         clear
         /etc/init.d/ngrokd start
         echo "Ngrok update success!"
@@ -537,3 +540,4 @@ update)
     echo "Usage: `basename $0` {install|uninstall|update|config}"
     ;;
 esac
+
