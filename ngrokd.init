@@ -35,7 +35,7 @@ LOGFILE=${ProGramInstallPath}/ngrok.log
 SCRIPTNAME=/etc/init.d/${NAME}
 PID_DIR=/var/run
 PID_FILE=${PID_DIR}/ngrok_clang.pid
-version="8.1"
+version="8.2"
 manage_port="4446"
 RET_VAL=0
 
@@ -115,13 +115,9 @@ fun_start()
     if [ "${arg1}" = "start" ]; then
       fun_clangcn
     fi
-    if [ ! -d $PID_DIR ]; then
-        mkdir -p $PID_DIR || echo "failed creating PID directory ${PID_DIR}"; exit 1
-    fi
-    if [ -f ${PID_FILE} ]; then
-        read PID < ${PID_FILE}
-        echo "$NAME (pid $PID) is already running..."
-        exit 0
+    if fun_check_run; then
+        echo "${NAME} (pid $PID) already running."
+        return 0
     fi
     echo -n "Starting ${ProgramName}: "
     fun_check_port
@@ -129,7 +125,6 @@ fun_start()
     ${BIN} -domain="$dns" -httpAddr=":$http_port" -httpsAddr=":$https_port" -pass="$pass" -tlsCrt="$srtCRT" -tlsKey="$strKey" -tunnelAddr=":$remote_port"${log_level} > ${LOGFILE} 2>&1 &
     RETVAL=$?
     PID=$(ps -ef | grep -v grep | grep -i ${BIN} | awk '{print $2}')
-    echo ${PID} > ${PID_FILE}
     if [ -f /etc/rc.d/init.d/functions ]; then
         [ $RETVAL -eq 0 ] && success
     else
@@ -388,4 +383,3 @@ case "${arg1}" in
     ;;
 esac
 exit $RET_VAL
-
